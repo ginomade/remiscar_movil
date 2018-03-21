@@ -1,0 +1,86 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.nomade.movilremiscar.remiscarmovil.CronoActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="#4863a0">
+
+            <TextView
+                android:layout_width="244dp"
+                android:layout_height="45dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="CRONOMETRO"
+                android:id="@+id/textView"
+                android:layout_gravity="center_horizontal"
+                android:textColor="#ffffff"
+                android:layout_marginLeft="20dp"
+                android:textSize="30dp" />
+        </FrameLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="4dp"
+            android:weightSum="1">
+
+            <Button
+                android:layout_width="280dp"
+                android:layout_height="50dp"
+                android:text="Iniciar"
+                style="@style/ButtonText"
+                android:id="@+id/buttonContar"
+                android:layout_alignParentBottom="true"
+                android:background="#4863a0"
+                android:layout_weight="1"
+                android:layout_marginTop="5dp"
+                android:layout_margin="5dp" />
+            <Button
+                android:layout_width="280dp"
+                android:layout_height="50dp"
+                android:text="Detener"
+                style="@style/ButtonText"
+                android:id="@+id/buttonPausa"
+                android:layout_alignParentBottom="true"
+                android:background="#4863a0"
+                android:layout_weight="1"
+                android:layout_marginTop="5dp"
+                android:layout_margin="5dp" />
+        </LinearLayout>
+        <Chronometer
+            android:layout_width="wrap_content"
+            android:layout_height="116dp"
+            android:id="@+id/chronometer"
+            android:layout_gravity="center_horizontal"
+            android:text="Cronometro"
+            android:singleLine="false"
+            android:textSize="90dp"
+            android:textAlignment="center" />
+
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="35dp"
+            android:text="Volver"
+            style="@style/ButtonText"
+            android:id="@+id/buttonInicio"
+            android:layout_alignParentBottom="true"
+            android:background="#4863a0" />
+
+    </LinearLayout>
+</RelativeLayout>

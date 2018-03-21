@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.nomade.movilremiscar.remiscarmovil" >
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-feature android:name="android.hardware.location.gps" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name=".SplashActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MapActivity"
+            android:label="@string/title_activity_map">
+        </activity>
+
+        <!-- Google MAP API key -->
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyBZsub9dRqt2nJXZrSBzLRpFh4e0iK7XAE" />
+
+        <activity
+            android:name=".NovedadesActivity"
+            android:label="@string/title_activity_novedades">
+        </activity>
+        <activity
+            android:name=".CamUsuActivity"
+            android:label="@string/title_activity_camusu">
+        </activity>
+        <activity
+            android:name=".ViajesActivity"
+            android:label="@string/title_activity_viajes">
+        </activity>
+        <activity
+            android:name=".ZonasActivity"
+            android:label="@string/title_activity_zonas">
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings">
+        </activity>
+        <activity
+            android:name=".PropActivity"
+            android:label="@string/title_activity_prop">
+        </activity>
+        <activity
+            android:name=".CobrarActivity"
+            android:label="@string/title_activity_cobrar">
+        </activity>
+        <activity
+            android:name=".PanicActivity"
+            android:label="@string/title_activity_panic">
+        </activity>
+        <activity
+            android:name=".AlertaActivity"
+            android:label="@string/title_activity_alerta">
+        </activity>
+        <activity
+            android:name=".CronoActivity"
+            android:label="@string/title_activity_crono"
+            android:configChanges="orientation|screenSize">
+        </activity>
+        <activity
+            android:name=".CallesActivity"
+            android:label="@string/title_activity_calles"
+            android:configChanges="orientation|screenSize">
+        </activity>
+        <activity
+            android:name=".VencimientosActivity"
+            android:label="@string/title_activity_vencimientos"
+            android:configChanges="orientation|screenSize">
+        </activity>
+        <activity
+            android:name=".CopiadoActivity"
+            android:label="@string/title_activity_copiado"
+            android:configChanges="orientation|screenSize">
+        </activity>
+    </application>
+
+</manifest>
