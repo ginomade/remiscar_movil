@@ -3,17 +3,14 @@ package com.nomade.movilremiscar.remiscarmovil;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.Toast;
 
 // pantalla de datos de novedades para el movil
 public class NovedadesActivity extends Activity {
@@ -25,7 +22,7 @@ public class NovedadesActivity extends Activity {
     private static final String URL_empresas = "http://carlitosbahia.dynns.com/legajos/viajes/Mempresas.php";
     private static final String URL_Cambio = "http://carlitosbahia.dynns.com/legajos/viajes/Mcambio.php";
 
-    Button buttonInicio, buttonVenc, buttonCalles, buttonEmpresas, buttonCamUsu ;
+    Button buttonInicio, buttonVenc, buttonCalles, buttonEmpresas, buttonCamUsu;
 
     String params;
 
@@ -38,7 +35,7 @@ public class NovedadesActivity extends Activity {
         String imei = settings.getString("imei", "");
         String movil = settings.getString("movil", "");
 
-        params = "?IMEI="+imei+"&Movil="+movil;
+        params = "?IMEI=" + imei + "&Movil=" + movil;
 
         mWebView = (WebView) findViewById(R.id.webView);
 
@@ -119,27 +116,27 @@ public class NovedadesActivity extends Activity {
         });
     }
 
-    WebViewClient yourWebClient = new WebViewClient(){
+    WebViewClient yourWebClient = new WebViewClient() {
         // you tell the webclient you want to catch when a url is about to load
         @Override
-        public boolean shouldOverrideUrlLoading(WebView  view, String  url){
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
             //mWebView.loadUrl(url);
             return true;
         }
+
         // here you execute an action when the URL you want is about to load
         @Override
-        public void onLoadResource(WebView  view, String  url){
+        public void onLoadResource(WebView view, String url) {
 
         }
     };
 
-    public void hideBtns(){
+    public void hideBtns() {
         buttonCalles.setVisibility(View.GONE);
         buttonEmpresas.setVisibility(View.GONE);
         buttonCamUsu.setVisibility(View.GONE);
         buttonVenc.setVisibility(View.GONE);
     }
-
 
 
     @Override

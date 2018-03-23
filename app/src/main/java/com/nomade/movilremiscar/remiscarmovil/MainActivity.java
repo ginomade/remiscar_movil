@@ -39,13 +39,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+import com.nomade.movilremiscar.remiscarmovil.events.AlertEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.AutoEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MActualEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.ValidacionEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,7 +61,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -85,15 +92,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     TextView textCarlitos, textLibres, textBahia, textLibresB, textOrigen, textDestino, textPasajero,
             textHoraViaje, textEmpresa, textObs, textStatus, textNroMovil;
 
-    private static String url_validacion = "http://carlitosbahia.dynns.com/legajos/viajes/Mvalidacion.php";
-    private static String url_actual = "http://carlitosbahia.dynns.com/legajos/viajes/Mactual3.php";
-    private static String url_iniciofin = "http://carlitosbahia.dynns.com/legajos/viajes/Miniciofin.php";
-    private static String url_alerta = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanicoalerta.php";
-    private static String url_mensaje = "http://carlitosbahia.dynns.com/legajos/viajes/Mmensajes.php";
-    private static String url_auto = "http://carlitosbahia.dynns.com/legajos/viajes/Mauto.php";
-    private static String url_panico = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanico.php";
-
-
     //seteo de intervalo de actualizacion de datos
     private final static int INTERVAL = 20 * 1000; // segundos
     Handler mHandler;
@@ -112,11 +110,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private static final int MY_PERMISSIONS_REQUEST = 1;
 
+    Context mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        mContext = MainActivity.this;
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermissions();
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
-        asValidarUsuario();
+        ServiceUtils.asValidarUsuario(mContext);
 
         initializeUI();
 
@@ -374,7 +376,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                         buttonInicio.setBackgroundColor(Color.parseColor("#FF08FF02"));
                         buttonCobrar.setBackgroundColor(Color.parseColor("#848FBF"));
-                        asInicioFin("fin");
+                        ServiceUtils.asInicioFin("fin", mContext,
+                                Origen, Traslados, ZonaDestino, Direccion, geopos);
                         Toast.makeText(getBaseContext(), "Viaje Finalizado.", Toast.LENGTH_LONG).show();
                         final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
                         mp.start();
@@ -408,7 +411,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                         buttonInicio.setBackgroundColor(Color.parseColor("#848FBF"));
                         buttonCobrar.setBackgroundColor(Color.parseColor("#FF08FF02"));
-                        asInicioFin("inicio");
+                        ServiceUtils.asInicioFin("inicio", mContext,
+                                Origen, Traslados, ZonaDestino, Direccion, geopos);
                         Toast.makeText(getBaseContext(), "Viaje Iniciado.", Toast.LENGTH_LONG).show();
                         final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
                         mp.start();
@@ -516,25 +520,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ZonaDestino = "";
         imei = getPhoneImei();
         //imei = "359015062458232";//TEST/////
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putFloat("latmovil", 0);
-        editor.putFloat("lonmovil", 0);
-        editor.putString("geopos", "");
-        editor.putString("Traslados", "");
-        editor.putString("latlonOrigen", "");
-        editor.putString("movil", "");
-        editor.putString("imei", imei);
-        editor.putString("al_status", "");
-        editor.putString("al_fecha", "");
-        editor.putString("al_geopos", "");
-        editor.putString("al_movil", "");
-        editor.putString("al_ubicacion", "");
-        editor.putString("movil", "");
-
-
-        // Commit the edits!
-        editor.commit();
+        SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
+        settings.saveFloat("latmovil", 0);
+        settings.saveFloat("lonmovil", 0);
+        settings.saveString("geopos", "");
+        settings.saveString("Traslados", "");
+        settings.saveString("latlonOrigen", "");
+        settings.saveString("movil", "");
+        settings.saveString("imei", imei);
+        settings.saveString("al_status", "");
+        settings.saveString("al_fecha", "");
+        settings.saveString("al_geopos", "");
+        settings.saveString("al_movil", "");
+        settings.saveString("al_ubicacion", "");
 
     }
 
@@ -656,14 +654,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public void run() {
             checkConnection();
             //processAlert();
-            ServiceUtils.asMActual(MainActivity.this, status, movil, imei,
+            ServiceUtils.asMActual(mContext, status,
                     Direccion, geopos);
-            asMensaje();
-            asAuto();
-            asAlert();
+            ServiceUtils.asMensaje(mContext);
+            ServiceUtils.asAuto(mContext);
+            ServiceUtils.asAlert(mContext, Direccion, geopos);
             clearCacheCounter++; // 180 == 1 hora
             if (clearCacheCounter >= (180 * 1)) {
-                deleteCache(MainActivity.this);
+                deleteCache(mContext);
                 clearCacheCounter = 0;
                 Log.w("Remiscar*", "***** CLEAR CACHE *****");
             }
@@ -750,7 +748,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         try {
             String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon;
             //+"&sensor=false&location_type=RANGE_INTERPOLATED&key=AIzaSyBZsub9dRqt2nJXZrSBzLRpFh4e0iK7XAE";
-            asUbicacion(url);
+            ServiceUtils.asUbicacion(mContext, url);
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -761,39 +759,34 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     // getting location.
 
-    private void asUbicacion(String url_ubicacion) {
-        Ion.with(MainActivity.this)
-                .load(url_ubicacion)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        try {
-                            Log.d("Remiscar ", "LOC --" + result.getAsString());
-                            logToSdcard("Remiscar ", "LOC --" + result.getAsString());
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processUbicacion(UbicacionEvent data) {
 
-                            JsonObject location = result.getAsJsonArray("results").get(0).getAsJsonObject();
-                            String location_string = location.get("formatted_address").getAsString();
-                            Direccion = location_string;
-                            SharedPreferences settings = getSharedPreferences("RemisData", 0);
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putString("Direccion", Direccion);
-                            // Commit the edits!
-                            editor.commit();
+        try {
+            JsonObject result = data.getObject();
+            Log.d("Remiscar ", "LOC --" + result.getAsString());
+            logToSdcard("Remiscar ", "LOC --" + result.getAsString());
+
+            JsonObject location = result.getAsJsonArray("results").get(0).getAsJsonObject();
+            String location_string = location.get("formatted_address").getAsString();
+            Direccion = location_string;
+            SharedPreferences settings = getSharedPreferences("RemisData", 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("Direccion", Direccion);
+            // Commit the edits!
+            editor.commit();
 
 
-                            frmStatusLoc.setBackgroundColor(Color.parseColor("#00FF00"));
+            frmStatusLoc.setBackgroundColor(Color.parseColor("#00FF00"));
 
-                        } catch (Exception ee) {
-                            if (t == "1")
-                                Toast.makeText(getBaseContext(), "No se puede recuperar ubicacion.", Toast.LENGTH_LONG).show();
-                            Log.d("Remiscar ", "No se puede recuperar ubicacion.");
-                            logToSdcard("Remiscar ", "No se puede recuperar ubicacion.");
-                            frmStatusLoc.setBackgroundColor(Color.parseColor("#ff9d9d9d"));
-                        }
+        } catch (Exception ee) {
+            if (t == "1")
+                Toast.makeText(getBaseContext(), "No se puede recuperar ubicacion.", Toast.LENGTH_LONG).show();
+            Log.d("Remiscar ", "No se puede recuperar ubicacion.");
+            logToSdcard("Remiscar ", "No se puede recuperar ubicacion.");
+            frmStatusLoc.setBackgroundColor(Color.parseColor("#ff9d9d9d"));
+        }
 
-                    }
-                });
     }
 
 
@@ -807,8 +800,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             /////TEST//////////////////
             //String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+ Origen +",La Plata,La Plata,Argentina&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw";
             /////TEST//////////////////
-            //new HttpAsyncLocation().execute(url);
-            asLocation(url);
+            ServiceUtils.asLocation(mContext, url);
             Log.d("REMISCAR - ", "Buscando Direccion ****** " + lOrigen);
             logToSdcard("REMISCAR - ", "Buscando Direccion ****** " + lOrigen);
         } catch (Exception e) {
@@ -850,28 +842,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return locOrigen;
     }
 
-
-    private void asLocation(String url_location) {
-        Ion.with(MainActivity.this)
-                .load(url_location)
-                .setBodyParameter("key", "AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw")//AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    @Override
-                    public void onCompleted(Exception e, String result) {
-                        try {
-                            processLocation(result);
-
-                        } catch (Exception ee) {
-                            Log.d("Remiscar ", " GET - error" + ee.toString());
-                            logToSdcard("Remiscar ", " GET - error" + ee.toString());
-                        }
-
-                    }
-                });
-    }
-
-    private void processLocation(String data) {
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processLocation(LocationEvent result) {
+        String data = result.getObject();
         Log.d("REMISCAR - ", " ADDRESS- POST LOCATION");
         logToSdcard("REMISCAR - ", " ADDRESS- POST LOCATION");
         JSONObject results = null;
@@ -939,40 +912,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     //Location fin
 
-    /**
-     * Background Async Task validar usuario
-     */
-
-    private void asValidarUsuario() {
-        Ion.with(MainActivity.this)
-                .load(url_validacion)
-                .setBodyParameter("IMEI", imei)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        try {
-                            Log.d("Remiscar* ", "imei " + imei);
-                            logToSdcard("Remiscar ", "imei " + imei);
-                            Log.d("Remiscar* ", "antes de envio validacion");
-                            logToSdcard("Remiscar ", "antes de envio validacion");
-
-                            processValidacion(result);
-
-
-                        } catch (Exception ee) {
-                            Log.d("Remiscar* ", " validar - error" + ee);
-                            logToSdcard("Remiscar ", " validar - error");
-                        }
-
-                    }
-                });
-    }
-
-    private void processValidacion(JsonObject data) {
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        SharedPreferences.Editor editor = settings.edit();
-        if (data != null) {
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processValidacion(ValidacionEvent result) {
+        if (result != null) {
+            JsonObject data = result.getObject();
             // check log cat from response
             Log.d("Remiscar* - ", "Login Response " + data.toString());
             logToSdcard("Remiscar - ", "Login Response " + data.toString());
@@ -985,28 +928,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
 
             if (success == 2) {
-                //Mactual1 - propietario
-                editor.putString("movil", movil);
-                editor.putString("imei", imei);
+                SharedPrefsUtil.getInstance(mContext).saveString("movil", movil);
+                SharedPrefsUtil.getInstance(mContext).saveString("imei", imei);
 
-                // Commit the edits!
-                editor.commit();
-
-                Intent intent = new Intent(MainActivity.this, PropActivity.class);
+                Intent intent = new Intent(mContext, PropActivity.class);
                 startActivity(intent);
                 finish();
 
             } else if (success == 1) {
                 //inicio valido para movil autorizado
                 textNroMovil.setText(movil);
-
-
-                editor.putString("movil", movil);
-                editor.putString("imei", imei);
-
-                // Commit the edits!
-                editor.commit();
-                ServiceUtils.asMActual(MainActivity.this, status, movil, imei,
+                SharedPrefsUtil.getInstance(mContext).saveString("movil", movil);
+                SharedPrefsUtil.getInstance(mContext).saveString("imei", imei);
+                ServiceUtils.asMActual(mContext, status,
                         Direccion, geopos);
                 if (flg_run == 0) {
                     startRepeatingTask();
@@ -1024,7 +958,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     private void processMActual(MActualEvent event) {
 
         try {
@@ -1153,80 +1087,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-
-    /**
-     * Background Async Task Inicio y fin viaje
-     */
-    private void asInicioFin(String task) {
-        String orig = "";
-        if (task.equals("inicio")) {
-            orig = Origen;
-        }
-
-        try {
-            String mOrigen = URLEncoder.encode(orig, "utf-8");
-            String mTraslados = URLEncoder.encode(Traslados, "utf-8");
-            String mZonaDestino = URLEncoder.encode(ZonaDestino, "utf-8");
-
-            String url_par = url_iniciofin + "?status=" + task + "&Movil=" + movil + "&IMEI=" + imei +
-                    "&Ubicacion=" + Direccion + "&geopos=" + geopos + "&origen=" + mOrigen + "&Traslados=" + mTraslados + "&ZonaFin=" + mZonaDestino;
-            Ion.with(MainActivity.this)
-                    .load(url_par)
-                    .asJsonObject()
-                    .setCallback(new FutureCallback<JsonObject>() {
-                        @Override
-                        public void onCompleted(Exception e, JsonObject result) {
-                            Log.d("Remiscar", "antes de envio InicioFin");
-                            logToSdcard("Remiscar", "antes de envio InicioFin");
-                            Log.d("Remiscar", "IF-data:" + imei + "-" + movil + "-" + Direccion + "-" + status + geopos);
-                            logToSdcard("Remiscar", "IF-data:" + imei + "-" + movil + "-" + Direccion + "-" + status + geopos);
-
-
-                        }
-                    });
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /*private void processInicioFin(JsonObject result){
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processInicioFin(InicioFinEvent result) {
         try {
             if (result != null) {
                 Log.d("Remiscar-IF-Response ", result.toString());
                 logToSdcard("Remiscar-IF-Response ", result.toString());
             }
-        }catch(Exception e){
-            Log.e("Remiscar ",e.toString());
+        } catch (Exception e) {
+            Log.e("Remiscar ", e.toString());
         }
 
-
-
-    };*/
-
-
-    /**
-     * Background Async Task verificar status de Panico
-     */
-    private void asAlert() {
-        String url_params = url_alerta + "?IMEI=" + imei +
-                "&status=&Movil=" + movil + "&Ubicacion=" + Direccion + "&GeoPos=" + geopos + "&movil_al=";
-        Ion.with(MainActivity.this)
-                .load(url_params)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-
-                        processAlert(result);
-
-                    }
-                });
     }
 
-    private void processAlert(JsonObject result) {
+    @Subscribe
+    private void processAlert(AlertEvent data) {
         // check for success tag
         try {
+            JsonObject result = data.getObject();
             Log.d("Remiscar A- alerta r-", result.toString());
             logToSdcard("Remiscar - alerta r-", result.toString());
             //success = json.getInt(TAG_SUCCESS);
@@ -1258,7 +1136,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                     //obtengo direccion en seguimiento
                     getMyLocationAddress();
-                    asPanic("SEGUIMIENTO", url_panico);
+                    ServiceUtils.asPanic(MainActivity.this, "SEGUIMIENTO", Direccion, geopos);
                 } else {
                     SharedPreferences settings = getSharedPreferences("RemisData", 0);
                     SharedPreferences.Editor editor = settings.edit();
@@ -1287,48 +1165,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-    ;
-
-
-    /**
-     * Background Async Task verificar mensajes al user
-     */
-    private void asMensaje() {
-
-        Ion.with(MainActivity.this)
-                .load(url_mensaje)
-                .setBodyParameter("Movil", movil)
-                .setBodyParameter("IMEI", imei)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-
-                        processMensaje(result);
-
-                    }
-                });
-    }
-
-    private void asAuto() {
-
-        Ion.with(MainActivity.this)
-                .load(url_auto)
-                .setBodyParameter("Movil", movil)
-                .setBodyParameter("IMEI", imei)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-
-                        processAuto(result);
-
-                    }
-                });
-    }
-
-    private void processMensaje(JsonObject result) {
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processMensaje(MensajeEvent data) {
         int success;
+        JsonObject result = new JsonObject();
+        result = data.getObject();
         Log.d("Remiscar", "data:" + imei + "-" + movil);
         logToSdcard("Remiscar", "data:" + imei + "-" + movil);
 
@@ -1370,10 +1211,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-    ;
-
-    private void processAuto(JsonObject result) {
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processAuto(AutoEvent data) {
         int success;
+        JsonObject result = new JsonObject();
+        result = data.getObject();
         Log.d("Remiscar", "data:" + imei + "-" + movil);
         logToSdcard("Remiscar", "data:" + imei + "-" + movil);
 
@@ -1415,46 +1257,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-    ;
-
-    /**
-     * Background Async Task mensaje de Panico
-     * envia actualizacion de ubicacion de alerta si el movil envio la alerta
-     * new PanicTask().execute("ALERTA", url_panico);
-     */
-
-    private void asPanic(String statusIn, String url) {
-        String status = statusIn;
-        String url_params = url + "?status=" + status + "&Movil=" + movil + "&IMEI=" + imei +
-                "&Ubicacion=" + Direccion + "&geopos=" + geopos;
-        Ion.with(MainActivity.this)
-                .load(url_params)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-
-                        processPanic(result);
-
-                    }
-                });
-    }
-
-    private void processPanic(JsonObject result) {
-        int success;
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processPanic(PanicEvent data) {
+        JsonObject result = new JsonObject();
+        result = data.getObject();
         Log.d("Remiscar", "envio Panic");
         Log.d("Remiscar", "data:" + imei + "-" + movil + "-" + Direccion + "-" + geopos);
-
 
         // check for success tag
         try {
             Log.d("Remiscar panic Res-", result.toString());
-            //success = result.get(TAG_SUCCESS).getAsInt();
-
-            //if (success == 0) {
             if (status == "PRUEBA") {
                 Log.d("Remiscar panic -", "PRUEBA");
-
 
             } else {
                 Log.d("Remiscar panic -", " seguimiento ALERTA");
@@ -1462,8 +1276,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 //startActivity(intent);
                 //finish();
             }
-
-            // }
 
         } catch (Exception e) {
             e.printStackTrace();

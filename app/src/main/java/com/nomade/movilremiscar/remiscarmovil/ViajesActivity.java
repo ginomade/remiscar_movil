@@ -1,6 +1,5 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,9 +7,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,28 +21,8 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
 //pantalla de datos de viajes
-public class ViajesActivity extends Activity  implements LocationListener {
+public class ViajesActivity extends AppCompatActivity implements LocationListener {
 
     WebView mWebView;
     private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mviajeshoy.php";
@@ -113,7 +91,7 @@ public class ViajesActivity extends Activity  implements LocationListener {
         locationInicio();
     }
 
-    private void reloadWebviewData(){
+    private void reloadWebviewData() {
         String fullUrl = URL + "?Movil=" + movil + "&imei=" + imei + "&geopos=" + geopos;
         mWebView.loadUrl(fullUrl);
     }
@@ -121,10 +99,10 @@ public class ViajesActivity extends Activity  implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
-        String str = location.getLatitude()+","+location.getLongitude();
+        String str = location.getLatitude() + "," + location.getLongitude();
 
         geopos = str;
-        Log.d("Remiscar ", " - set location -"+str);
+        Log.d("Remiscar ", " - set location -" + str);
 
         lat = (Double) location.getLatitude();
         lon = (Double) location.getLongitude();
@@ -151,17 +129,17 @@ public class ViajesActivity extends Activity  implements LocationListener {
         PackageManager pm = ViajesActivity.this.getPackageManager();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1500, 10, this);
-        if (pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)){
-            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+        if (pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1500, 10, this);
                 Log.d("Remiscar -", " GPS conectado");
-            }else{
+            } else {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1500, 10, this);
                 Toast.makeText(this, "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
                 Log.d("Remiscar -", " NETWORK over GPS");
             }
 
-        }else{
+        } else {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1500, 10, this);
             Log.d("Remiscar -", " NETWORK conectado");
 
@@ -169,17 +147,18 @@ public class ViajesActivity extends Activity  implements LocationListener {
     }
 
     // somewhere on your code...
-    WebViewClient yourWebClient = new WebViewClient(){
+    WebViewClient yourWebClient = new WebViewClient() {
         // you tell the webclient you want to catch when a url is about to load
         @Override
-        public boolean shouldOverrideUrlLoading(WebView  view, String  url){
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
             mWebView.loadUrl(url);
             return true;
         }
+
         // here you execute an action when the URL you want is about to load
         @Override
-        public void onLoadResource(WebView  view, String  url){
-            if( url.equals(URL_cobro) ){
+        public void onLoadResource(WebView view, String url) {
+            if (url.equals(URL_cobro)) {
                 String fullCobroUrl = URL_cobro + "?imei=" + imei + "&geopos=" + geopos;
                 mWebView.loadUrl(fullCobroUrl);
                 Toast.makeText(ViajesActivity.this, "Cobro.", Toast.LENGTH_LONG).show();

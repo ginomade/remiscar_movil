@@ -46,6 +46,16 @@ public class SharedPrefsUtil {
         return prefs.getBoolean(key, defValue);
     }
 
+    public void saveFloat(String key, float value) {
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putFloat(key, value);
+        edit.commit();
+    }
+
+    public float getFloat(String key, float defValue) {
+        return prefs.getFloat(key, defValue);
+    }
+
     public void saveLong(String key, long value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putLong(key, value);

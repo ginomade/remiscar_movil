@@ -1,39 +1,13 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.SystemClock;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Chronometer;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 
 /**
@@ -44,7 +18,7 @@ public class CronoActivity extends Activity {
     Button buttonInicio;
     Button Iniciar, Detener;
     Chronometer Crono;
-    long Time=0;
+    long Time = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +37,8 @@ public class CronoActivity extends Activity {
         });
 
         Crono = (Chronometer) findViewById(R.id.chronometer);
-        Iniciar= (Button) findViewById(R.id.buttonContar);
-        Detener=(Button) findViewById(R.id.buttonPausa);
+        Iniciar = (Button) findViewById(R.id.buttonContar);
+        Detener = (Button) findViewById(R.id.buttonPausa);
         Iniciar.setEnabled(true);
         Detener.setEnabled(false);
 
@@ -82,17 +56,17 @@ public class CronoActivity extends Activity {
             }
         });
         Detener.setOnClickListener(new View.OnClickListener() {
-        @Override
+            @Override
 
-        public void onClick(View v) {
-            Iniciar.setEnabled(true);
-            buttonInicio.setEnabled(true);
-            Detener.setEnabled(false);
-            Detener.setTextColor(Color.parseColor("#d5d9ea"));
-            buttonInicio.setTextColor(Color.parseColor("#FA67FF01"));
-            Crono.stop();
-        }
-    });
+            public void onClick(View v) {
+                Iniciar.setEnabled(true);
+                buttonInicio.setEnabled(true);
+                Detener.setEnabled(false);
+                Detener.setTextColor(Color.parseColor("#d5d9ea"));
+                buttonInicio.setTextColor(Color.parseColor("#FA67FF01"));
+                Crono.stop();
+            }
+        });
     }
 
     @Override

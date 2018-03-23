@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -46,8 +48,8 @@ public class PanicActivity extends Activity {
         imei = getPhoneImei();
         //imei = "359015062458232";//TEST/////
         //coordenadas del movil.
-        latmovil=0.0;
-        lonmovil=0.0;
+        latmovil = 0.0;
+        lonmovil = 0.0;
 
         SharedPreferences settings = getSharedPreferences("RemisData", 0);
         movil = settings.getString("movil", "");
@@ -121,9 +123,12 @@ public class PanicActivity extends Activity {
     }
 
     //Obtener numero de imei
-    private String getPhoneImei(){
+    private String getPhoneImei() {
         TelephonyManager mTelephonyManager;
         mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+
+        }
         return mTelephonyManager.getDeviceId();
     }
 

@@ -1,14 +1,8 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,10 +10,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.Toast;
 
 // pantalla de datos por zonas
 public class CallesActivity extends Activity {
@@ -52,7 +43,7 @@ public class CallesActivity extends Activity {
 
         mWebView.setWebViewClient(yourWebClient);
 
-        String fullUrl = URL+"?Movil="+movil;
+        String fullUrl = URL + "?Movil=" + movil;
         mWebView.loadUrl(fullUrl);
 
 
@@ -68,16 +59,17 @@ public class CallesActivity extends Activity {
     }
 
 
-    WebViewClient yourWebClient = new WebViewClient(){
+    WebViewClient yourWebClient = new WebViewClient() {
         // you tell the webclient you want to catch when a url is about to load
         @Override
-        public boolean shouldOverrideUrlLoading(WebView  view, String  url){
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
             //mWebView.loadUrl(url);
             return true;
         }
+
         // here you execute an action when the URL you want is about to load
         @Override
-        public void onLoadResource(WebView  view, String  url){
+        public void onLoadResource(WebView view, String url) {
 
         }
     };

@@ -1,12 +1,8 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,30 +11,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.Toast;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
 //pantalla de datos de viajes
-public class CopiadoActivity extends Activity {
+public class CopiadoActivity extends AppCompatActivity {
 
     WebView mWebView;
     private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mcopiado.php";
@@ -50,6 +25,7 @@ public class CopiadoActivity extends Activity {
 
     String movil, resp;
     String Traslados;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +42,7 @@ public class CopiadoActivity extends Activity {
 
         mWebView.setWebViewClient(yourWebClient);
 
-        String fullUrl = URL+"?Traslados="+Traslados;
+        String fullUrl = URL + "?Traslados=" + Traslados;
         mWebView.loadUrl(fullUrl);
 
         //new ViajesTask().execute();
@@ -86,10 +62,10 @@ public class CopiadoActivity extends Activity {
     }
 
     // somewhere on your code...
-    WebViewClient yourWebClient = new WebViewClient(){
+    WebViewClient yourWebClient = new WebViewClient() {
         // you tell the webclient you want to catch when a url is about to load
         @Override
-        public boolean shouldOverrideUrlLoading(WebView  view, String  url){
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
             mWebView.loadUrl(url);
             return true;
         }
@@ -143,80 +119,5 @@ public class CopiadoActivity extends Activity {
         finish();
     }
 
-    /**
-     * Background Async Task Obtener viajes
-     * */
-    class CopiadoTask extends AsyncTask<String, String, String> {
-
-        int success;
-        /**
-         * Before starting background thread Show Progress Dialog
-         * */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-        }
-
-        /**
-         * Creating product
-         * */
-        protected String doInBackground(String... args) {
-            //String imei = "";
-
-            String fullUrl = URL+"?Traslados="+Traslados;
-            // Building Parameters
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("Movil", movil));
-            params.add(new BasicNameValuePair("Traslados", Traslados));
-
-            HttpClient client = new DefaultHttpClient();
-            HttpPost post = new HttpPost(fullUrl);
-
-            Log.d("Remiscar", "antes de envio Viajes");
-
-            try {
-                post.setEntity(new UrlEncodedFormEntity(params));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            HttpResponse response = null;
-            try {
-                response = client.execute(post);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            String responseStr = null;
-            try {
-                responseStr = EntityUtils.toString(response.getEntity());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (responseStr!=""){
-                //editTextStatus.setText((responseStr.length()));
-            }
-
-
-            // check log cat from response
-            Log.d("Remiscar-Viajes-Resp ", responseStr);
-
-            return responseStr;
-
-
-        }
-
-        /**
-         * After completing background task
-         * **/
-        protected void onPostExecute(String response) {
-
-
-            mWebView.loadUrl(response);
-            //mWebView.reload();
-
-
-        }
-
-    }
 }
 
