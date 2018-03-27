@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -29,14 +30,14 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 import java.util.ArrayList;
 
 
-public class MapActivity extends AppCompatActivity implements LocationListener {
+public class MapActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback {
 
     Double latmovil, lonmovil, latOrigen, lonOrigen;
-    private LocationManager locationManager;
     GoogleMap googleMap;
     ArrayList<Location> listLocs;
     Marker Mtrack;
@@ -46,7 +47,6 @@ public class MapActivity extends AppCompatActivity implements LocationListener {
     int flg_run = 0; // flag repeating task running
     private final static int INTERVAL = 20 * 1000; // segundos
     private static String url_actual = "http://carlitosbahia.dynns.com/legajos/viajes/Mactual3.php";
-    String TAG_SUCCESS = "result";
     String tag_remis = "remiscar map ";
 
 
@@ -68,34 +68,22 @@ public class MapActivity extends AppCompatActivity implements LocationListener {
 
         listLocs = new ArrayList<Location>();
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        latmovil = (double) settings.getFloat("latmovil", 0);
-        lonmovil = (double) settings.getFloat("lonmovil", 0);
-        latlonOrigen = settings.getString("latlonOrigen", "");
-        imei = settings.getString("imei", "");
-        movil = settings.getString("movil", "");
-        status = settings.getString("status", "");
-        direccion = settings.getString("Direccion", "");
+        SharedPrefsUtil prefs = SharedPrefsUtil.getInstance(this);
+        latmovil = (double) prefs.getFloat("latmovil", 0);
+        lonmovil = (double) prefs.getFloat("lonmovil", 0);
+        latlonOrigen = prefs.getString("latlonOrigen", "");
+        imei = prefs.getString("imei", "");
+        movil = prefs.getString("movil", "");
+        status = prefs.getString("status", "");
+        direccion = prefs.getString("Direccion", "");
         Log.d(tag_remis, "origen-" + latlonOrigen);
         strMovil = latmovil + "," + lonmovil;
-        //Location inicio
-        locationInicio();
-        //Location fin
 
-        SupportMapFragment mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap map) {
-                googleMap = map;
-            }
-        });
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        googleMap.getUiSettings().setZoomGesturesEnabled(true);
-        //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 10.0f));
-//-34.935506,-57.9556878
-        final LatLng Inicio = new LatLng(latmovil, lonmovil);
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
-        Marker TP = googleMap.addMarker(new MarkerOptions().position(Inicio).title("Movil"));
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
 
         if (!latlonOrigen.equals("")) {
             Log.d(tag_remis, "marcador****LATLON  NOvacio");
@@ -135,40 +123,6 @@ public class MapActivity extends AppCompatActivity implements LocationListener {
         return super.onOptionsItemSelected(item);
     }
 
-    private void locationInicio() {
-        PackageManager pm = MapActivity.this.getPackageManager();
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 10, this);
-                Log.d(tag_remis, " GPS conectado");
-            } else {
-                //showGPSDisabledAlertToUser();
-
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 10, this);
-                //Toast.makeText(this, "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
-                Log.d(tag_remis, " NETWORK over GPS");
-            }
-        } else {
-            //showGPSDisabledAlertToUser();
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 10, this);
-            Log.d(tag_remis, " NETWORK conectado");
-        }
-        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 10, this);
-        getMyLocationAddress();
-    }
-
-    //Location inicio
     @Override
     public void onProviderDisabled(String provider) {
 
@@ -333,41 +287,14 @@ public class MapActivity extends AppCompatActivity implements LocationListener {
 
     }
 
-
-    public void getMyLocationAddress() {
-
-        try {
-            String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latmovil + "," + lonmovil + "&sensor=false&location_type=RANGE_INTERPOLATED&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw";
-            asUbicacion(url);
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
+    @Override
+    public void onMapReady(GoogleMap map) {
+        googleMap = map;
+        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        googleMap.getUiSettings().setZoomGesturesEnabled(true);
+        //-34.935506,-57.9556878
+        final LatLng Inicio = new LatLng(latmovil, lonmovil);
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
+        Marker TP = googleMap.addMarker(new MarkerOptions().position(Inicio).title("Movil"));
     }
-
-    private void asUbicacion(String url_ubicacion) {
-        Ion.with(MapActivity.this)
-                .load(url_ubicacion)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        try {
-                            Log.d("Remiscar ", "LOC --" + result.toString());
-
-                            JsonObject location = result.getAsJsonArray("results").get(0).getAsJsonObject();
-                            String location_string = location.get("formatted_address").getAsString();
-                            direccion = location_string;
-
-
-                        } catch (Exception ee) {
-                            Log.d("Remiscar ", "No se puede recuperar ubicacion.");
-                        }
-
-                    }
-                });
-    }
-
-
 }

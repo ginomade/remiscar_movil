@@ -15,8 +15,8 @@
         <item name="android:shadowColor">#000000</item>
         <item name="android:shadowDx">1</item>
         <item name="android:shadowDy">1</item>
-        <item name="android:shadowRadius">2</item>
-        <item name="android:background">#1FA9FF</item>
+        <item name="android:shadowRadius">5</item>
+        <item name="android:background">#0288D1</item>
     </style>
     <string name="title_activity_map">MapActivity</string>
     <string name="title_activity_novedades">NovedadesActivity</string>

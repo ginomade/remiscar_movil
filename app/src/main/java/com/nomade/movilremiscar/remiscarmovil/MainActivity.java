@@ -6,12 +6,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -19,7 +17,6 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
@@ -39,6 +36,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
+import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.PollingManager;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 import com.nomade.movilremiscar.remiscarmovil.events.AlertEvent;
@@ -48,6 +47,7 @@ import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MActualEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ValidacionEvent;
 
@@ -69,18 +69,15 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     String t = "0"; //mensajes test
-    private LocationManager locationManager;
     private String imei, Direccion;
     String TAG_SUCCESS = "result";
     int st_flag = 0; // status general - 0=libre - 1=ocupado
-    int flg_run = 0; // flag repeating task running
+
     int flg_origen = 0; // flag repeating task running
     public int pa = 0;// flag para boton de panico
     int flg_mens = 0; // flag para mensajes
     Double lat, lon;
-    private int clearCacheCounter = 0;
 
-    private ProgressDialog pDialog;
     Button buttonMap, buttonNov, buttonViajes, buttonCobrar, buttonPanico, buttonInicio;
     LinearLayout layZonas;
 
@@ -92,9 +89,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     TextView textCarlitos, textLibres, textBahia, textLibresB, textOrigen, textDestino, textPasajero,
             textHoraViaje, textEmpresa, textObs, textStatus, textNroMovil;
 
-    //seteo de intervalo de actualizacion de datos
-    private final static int INTERVAL = 20 * 1000; // segundos
-    Handler mHandler;
+
     File outfile = null;
 
     /////////////TEST/////////////
@@ -104,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     FrameLayout frmAlerta, frmStatusLoc, frmStatusOrigen;
 
+    private GooglePlayServicesHelper locationHelper;
+
     String[] mPermission = {Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -112,6 +109,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     Context mContext;
 
+    SharedPrefsUtil sharedPrefs;
+
+    PollingManager pollingManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,10 +120,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         mContext = MainActivity.this;
+        sharedPrefs = SharedPrefsUtil.getInstance(mContext);
+
+        pollingManager = new PollingManager(this);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermissions();
         }
+
+        locationHelper = new GooglePlayServicesHelper(this, true);
+
         ////////////TEST////////////////////////////
         ////log en sdcard
         // setear el IF a true para generar el log
@@ -148,11 +155,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         inicializarDatos();
         checkConnection();
-        //Location inicio
-        locationInicio();
-        //Location fin
 
-        mHandler = new Handler();
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
@@ -470,45 +473,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-    private void locationInicio() {
-        PackageManager pm = MainActivity.this.getPackageManager();
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 10, this);
-        if (pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 10, this);
-                Log.d("Remiscar -", " GPS conectado");
-                logToSdcard("Remiscar -", " GPS conectado");
-            } else {
-                showGPSDisabledAlertToUser();
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 10, this);
-                Toast.makeText(this, "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
-                Log.d("Remiscar -", " NETWORK over GPS");
-                logToSdcard("Remiscar -", " NETWORK over GPS");
-            }
-
-        } else {
-            showGPSDisabledAlertToUser();
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 10, this);
-            Log.d("Remiscar -", " NETWORK conectado");
-            logToSdcard("Remiscar -", " NETWORK conectado");
-        }
-        /////TEST//////////////////
-        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 10, this);
-        /////TEST//////////////////
-        //processAlert();
-    }
-
     private void inicializarDatos() {
         carlitos = "";
         carlibres = "";
@@ -534,29 +498,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         settings.saveString("al_movil", "");
         settings.saveString("al_ubicacion", "");
 
-    }
-
-    private void showGPSDisabledAlertToUser() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage("GPS deshabilitado. Quiere activarlo?")
-                .setCancelable(false)
-                .setPositiveButton("Ir a GPS",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Intent callGPSSettingIntent = new Intent(
-                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                startActivity(callGPSSettingIntent);
-                            }
-                        });
-        alertDialogBuilder.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alert = alertDialogBuilder.create();
-        alert.show();
     }
 
     public static boolean isWifiConnected(Context context) {
@@ -593,38 +534,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onPause() {
         super.onPause();
-        stopRepeatingTask();
+        pollingManager.stopRepeatingTask();
         EventBus.getDefault().unregister(this);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopRepeatingTask();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        stopRepeatingTask();
-
-    }
-
-    @Override
     public void onResume() {
-        super.onResume();  // Always call the superclass method first
-        //inicializarDatos();
-        if (flg_run == 0) {
-            startRepeatingTask();
-        }
+        super.onResume();
+        pollingManager.startRepeatingTask();
         EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();  // Always call the superclass method first
-        //if(flg_run==0){startRepeatingTask();};
-        // Activity being restarted from stopped state
     }
 
     @Override
@@ -647,39 +565,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    Runnable mHandlerTask = new Runnable() {
-        @Override
-        public void run() {
-            checkConnection();
-            //processAlert();
-            ServiceUtils.asMActual(mContext, status,
-                    Direccion, geopos);
-            ServiceUtils.asMensaje(mContext);
-            ServiceUtils.asAuto(mContext);
-            ServiceUtils.asAlert(mContext, Direccion, geopos);
-            clearCacheCounter++; // 180 == 1 hora
-            if (clearCacheCounter >= (180 * 1)) {
-                deleteCache(mContext);
-                clearCacheCounter = 0;
-                Log.w("Remiscar*", "***** CLEAR CACHE *****");
-            }
-            pa = 0;//reset boton de panico
-            flg_origen = 0;
-            mHandler.postDelayed(mHandlerTask, INTERVAL);
-        }
-    };
-
-    void startRepeatingTask() {
-        if (flg_run == 0) mHandlerTask.run();
-        flg_run = 1;
-
-    }
-
-    void stopRepeatingTask() {
-        mHandler.removeCallbacks(mHandlerTask);
-        flg_run = 0;
     }
 
 
@@ -730,17 +615,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         str = lat.toString()+","+lon.toString();*/
         ////////////////////TEST///////////
         geopos = str;
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putFloat("latmovil", lat.floatValue());
-        editor.putFloat("lonmovil", lon.floatValue());
-        editor.putString("geopos", str);
+        sharedPrefs.saveFloat("latmovil", lat.floatValue());
+        sharedPrefs.saveFloat("lonmovil", lon.floatValue());
+        sharedPrefs.saveString("geopos", str);
 
-        // Commit the edits!
-        editor.commit();
-
-
-        //processAlert();
     }
 
     public void getMyLocationAddress() {
@@ -770,12 +648,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             JsonObject location = result.getAsJsonArray("results").get(0).getAsJsonObject();
             String location_string = location.get("formatted_address").getAsString();
             Direccion = location_string;
-            SharedPreferences settings = getSharedPreferences("RemisData", 0);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString("Direccion", Direccion);
-            // Commit the edits!
-            editor.commit();
-
+            sharedPrefs.saveString("Direccion", Direccion);
 
             frmStatusLoc.setBackgroundColor(Color.parseColor("#00FF00"));
 
@@ -874,10 +747,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 if (locationType.equals("APPROXIMATE")) {
                     // si geopos no puede encontrar la direccion devuelve APPROXIMATE
                     // enviamos vacio en latlonOrigen
-                    SharedPreferences settings = getSharedPreferences("RemisData", 0);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("latlonOrigen", "");
-                    editor.commit();
+                    sharedPrefs.saveString("latlonOrigen", "");
+
                     Log.d("REMISCAR - ", " ADDRESS- fallo en geopos");
                     logToSdcard("REMISCAR - ", " ADDRESS- fallo en geopos");
                     frmStatusOrigen.setBackgroundColor(Color.parseColor("#fff4b2"));
@@ -886,12 +757,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     Double location_lat = location.getDouble("lat");
                     Double location_lon = location.getDouble("lng");
                     ObtCoordenadas = String.valueOf(location_lat) + "," + String.valueOf(location_lon);
-                    SharedPreferences settings = getSharedPreferences("RemisData", 0);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("latlonOrigen", ObtCoordenadas);
-                    editor.putString("geopos", ObtCoordenadas);
-                    // Commit the edits!
-                    editor.commit();
+                    sharedPrefs.saveString("latlonOrigen", ObtCoordenadas);
+                    sharedPrefs.saveString("geopos", ObtCoordenadas);
+
                     Log.d("REMISCAR - ", " ADDRESS OK-" + ObtCoordenadas);
                     logToSdcard("REMISCAR - ", " ADDRESS OK-" + ObtCoordenadas);
                     frmStatusOrigen.setBackgroundColor(Color.parseColor("#00ff00"));
@@ -928,8 +796,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
 
             if (success == 2) {
-                SharedPrefsUtil.getInstance(mContext).saveString("movil", movil);
-                SharedPrefsUtil.getInstance(mContext).saveString("imei", imei);
+                sharedPrefs.saveString("movil", movil);
+                sharedPrefs.saveString("imei", imei);
 
                 Intent intent = new Intent(mContext, PropActivity.class);
                 startActivity(intent);
@@ -938,13 +806,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             } else if (success == 1) {
                 //inicio valido para movil autorizado
                 textNroMovil.setText(movil);
-                SharedPrefsUtil.getInstance(mContext).saveString("movil", movil);
-                SharedPrefsUtil.getInstance(mContext).saveString("imei", imei);
+                sharedPrefs.saveString("movil", movil);
+                sharedPrefs.saveString("imei", imei);
                 ServiceUtils.asMActual(mContext, status,
                         Direccion, geopos);
-                if (flg_run == 0) {
-                    startRepeatingTask();
-                }
+
+                pollingManager.startRepeatingTask();
+
 
             } else if (success == 0) {
                 Toast.makeText(getApplicationContext(), "App solo para propietarios autorizados.", Toast.LENGTH_SHORT)
@@ -1009,13 +877,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 textStatus.setText(status);
                 frmStatusOrigen.setBackgroundColor(Color.parseColor("#fff4b2"));
 
-                SharedPreferences settings = getSharedPreferences("RemisData", 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("latlonOrigen", resultLoc);
-                editor.putString("movil", movil);
-                editor.putString("status", status);
-                editor.putString("imei", imei);
-                editor.commit();
+                sharedPrefs.saveString("latlonOrigen", resultLoc);
+                sharedPrefs.saveString("movil", movil);
+                sharedPrefs.saveString("status", status);
+                sharedPrefs.saveString("imei", imei);
 
                 if (status == "LIBRE") {
                     buttonInicio.setBackgroundColor(Color.parseColor("#1FA9FF"));
@@ -1051,8 +916,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     if (Origen.equals("")) {
 
                         resultLoc = "";
-                        editor.putString("latlonOrigen", resultLoc);
-                        editor.commit();
+                        sharedPrefs.saveString("latlonOrigen", resultLoc);
 
                     } else {
                         if (flg_origen == 0) getAddressLocation();
@@ -1068,8 +932,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     }
                 } else {
                     resultLoc = ObtCoordenadas;
-                    editor.putString("latlonOrigen", resultLoc);
-                    editor.commit();
+                    sharedPrefs.saveString("latlonOrigen", resultLoc);
                     frmStatusOrigen.setBackgroundColor(Color.parseColor("#00ff00"));
                     //-34.935506,-57.9556878
                     //editor.putString("latlonOrigen","-34.935506,-57.9");
@@ -1138,14 +1001,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     getMyLocationAddress();
                     ServiceUtils.asPanic(MainActivity.this, "SEGUIMIENTO", Direccion, geopos);
                 } else {
-                    SharedPreferences settings = getSharedPreferences("RemisData", 0);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("al_status", al_status);
-                    editor.putString("al_fecha", al_fecha);
-                    editor.putString("al_geopos", al_geopos);
-                    editor.putString("al_movil", al_movil);
-                    editor.putString("al_ubicacion", al_ubicacion);
-                    editor.commit();
+                    sharedPrefs.saveString("al_status", al_status);
+                    sharedPrefs.saveString("al_fecha", al_fecha);
+                    sharedPrefs.saveString("al_geopos", al_geopos);
+                    sharedPrefs.saveString("al_movil", al_movil);
+                    sharedPrefs.saveString("al_ubicacion", al_ubicacion);
 
                     frmAlerta.setVisibility(View.VISIBLE);
                     //AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) frmAlerta.getLayoutParams();
@@ -1283,31 +1143,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-    ;
-
-    public static void deleteCache(Context context) {
-        try {
-            File dir = context.getCacheDir();
-            deleteDir(dir);
-        } catch (Exception e) {
-        }
+    @Subscribe
+    private void onPollingStep(PollingEvent event) {
+        pa = 0;//reset boton de panico
+        flg_origen = 0;
     }
-
-    public static boolean deleteDir(File dir) {
-        if (dir != null && dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
-                }
-            }
-            return dir.delete();
-        } else if (dir != null && dir.isFile()) {
-            return dir.delete();
-        } else {
-            return false;
-        }
-    }
-
 }

@@ -33,12 +33,14 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
      * https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest
      */
     public static int LOCATION_GPS_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
-    public static int LOCATION_GPS_INTERVAL_MILLIS = 20000;//60 seg
-    public static int LOCATION_GPS_FASTEST_INTERVAL_MILLIS = 10000;//30seg
+    public static int LOCATION_GPS_INTERVAL_MILLIS = 20000;
+    public static int LOCATION_GPS_FASTEST_INTERVAL_MILLIS = 10000;
 
     private final GoogleApiClient mGoogleApiClient;
     private Set<LocationListener> locationListeners;
     private boolean gpsOn;
+
+    Context mContext;
 
     public GooglePlayServicesHelper(Context context, boolean gpsOn) {
 
@@ -54,7 +56,7 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
         }
 
         mGoogleApiClient = builder.build();
-
+        mContext = context;
     }
 
     // Conecta no Google Play Services
@@ -95,8 +97,18 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
 
         if (gpsOn) {
             // Start GPS
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
+            if (ActivityCompat.checkSelfPermission(mContext,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
             }
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
@@ -132,7 +144,8 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
     }
 
     public Location getLastLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
         }
         Location l = LocationServices.FusedLocationApi.getLastLocation(
