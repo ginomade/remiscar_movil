@@ -63,7 +63,7 @@ public class ServiceUtils {
                                 Log.d("Remiscar MAc Res- ", result.toString());
                                 MActualEvent event = new MActualEvent();
                                 event.setObject(result);
-                                EventBus.getDefault().post(result);
+                                EventBus.getDefault().post(event);
                             } else {
                                 Log.d("Remiscar* ", "Remiscar MAc Res- NULL**********");
                             }
@@ -88,7 +88,7 @@ public class ServiceUtils {
                         if (result != null) {
                             MensajeEvent event = new MensajeEvent();
                             event.setObject(result);
-                            EventBus.getDefault().post(result);
+                            EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en respuesta de mensajes.");
                         }
@@ -109,7 +109,7 @@ public class ServiceUtils {
                         if (result != null) {
                             AutoEvent event = new AutoEvent();
                             event.setObject(result);
-                            EventBus.getDefault().post(result);
+                            EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en asAuto.");
                         }
@@ -140,7 +140,7 @@ public class ServiceUtils {
                         if (result != null) {
                             PanicEvent event = new PanicEvent();
                             event.setObject(result);
-                            EventBus.getDefault().post(result);
+                            EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en asPanic.");
                         }
@@ -182,7 +182,7 @@ public class ServiceUtils {
                             if (result != null) {
                                 InicioFinEvent event = new InicioFinEvent();
                                 event.setObject(result);
-                                EventBus.getDefault().post(result);
+                                EventBus.getDefault().post(event);
                             } else {
                                 Log.d("Remiscar* ", "error en asInicioFin.");
                             }
@@ -210,7 +210,7 @@ public class ServiceUtils {
                         if (result != null) {
                             AlertEvent event = new AlertEvent();
                             event.setObject(result);
-                            EventBus.getDefault().post(result);
+                            EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en asAlert.");
                         }
@@ -230,7 +230,7 @@ public class ServiceUtils {
                             if (result != null) {
                                 ValidacionEvent event = new ValidacionEvent();
                                 event.setObject(result);
-                                EventBus.getDefault().post(result);
+                                EventBus.getDefault().post(event);
                             } else {
                                 Log.d("Remiscar* ", "error en asValidarUsuario.");
                             }
@@ -253,7 +253,7 @@ public class ServiceUtils {
                         if (result != null) {
                             LocationEvent event = new LocationEvent();
                             event.setObject(result);
-                            EventBus.getDefault().post(result);
+                            EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en asLocation.");
                         }
@@ -272,7 +272,7 @@ public class ServiceUtils {
                         if (result != null) {
                             UbicacionEvent event = new UbicacionEvent();
                             event.setObject(result);
-                            EventBus.getDefault().post(result);
+                            EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en asLocation.");
                         }
