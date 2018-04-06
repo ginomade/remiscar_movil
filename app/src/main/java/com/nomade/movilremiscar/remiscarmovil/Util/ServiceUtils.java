@@ -1,20 +1,16 @@
 package com.nomade.movilremiscar.remiscarmovil.Util;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.nomade.movilremiscar.remiscarmovil.MainActivity;
 import com.nomade.movilremiscar.remiscarmovil.events.AlertEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.AutoEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
-import com.nomade.movilremiscar.remiscarmovil.events.MActualEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
@@ -32,48 +28,13 @@ import java.net.URLEncoder;
 public class ServiceUtils {
 
     private static String url_validacion = "http://carlitosbahia.dynns.com/legajos/viajes/Mvalidacion.php";
-    private static String url_actual = "http://carlitosbahia.dynns.com/legajos/viajes/Mactual3.php";
     private static String url_iniciofin = "http://carlitosbahia.dynns.com/legajos/viajes/Miniciofin.php";
     private static String url_alerta = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanicoalerta.php";
     private static String url_mensaje = "http://carlitosbahia.dynns.com/legajos/viajes/Mmensajes.php";
     private static String url_auto = "http://carlitosbahia.dynns.com/legajos/viajes/Mauto.php";
     private static String url_panico = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanico.php";
-
-    public static void asMActual(Context context,
-                                 String status,
-                                 String direccion,
-                                 String geopos) {
-
-        String url_params = url_actual + "?status=" + status +
-                "&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") +
-                "&IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
-                "&Ubicacion="
-                + direccion + "&geopos=" + geopos;
-        Log.d("Remiscar MACT DATA- ", url_params);
-        try {
-            Ion.with(context)
-                    .load(url_params)
-                    .asJsonObject()
-                    .setCallback(new FutureCallback<JsonObject>() {
-                        @Override
-                        public void onCompleted(Exception e, JsonObject result) {
-
-                            //processMActual(result);
-                            if (result != null) {
-                                Log.d("Remiscar MAc Res- ", result.toString());
-                                MActualEvent event = new MActualEvent();
-                                event.setObject(result);
-                                EventBus.getDefault().post(event);
-                            } else {
-                                Log.d("Remiscar* ", "Remiscar MAc Res- NULL**********");
-                            }
-                        }
-
-                    });
-        } catch (Exception ex) {
-            Log.e("Remiscar* ", "** error en MActual **");
-        }
-    }
+    public static String url_main = "http://carlitosbahia.dynns.com/legajos/viajes/Mviajeshoy.php";
+    private static String url_ubicacionViaje = "http://carlitosbahia.dynns.com/legajos/viajes/Mcoordenadas.php";
 
     public static void asMensaje(Context context) {
 
@@ -91,6 +52,27 @@ public class ServiceUtils {
                             EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en respuesta de mensajes.");
+                        }
+                    }
+                });
+    }
+
+    public static void asCoordenadas(Context context) {
+
+        Ion.with(context)
+                .load(url_ubicacionViaje)
+                .setBodyParameter("Movil", SharedPrefsUtil.getInstance(context).getString("movil", ""))
+                .setBodyParameter("IMEI", SharedPrefsUtil.getInstance(context).getString("imei", ""))
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (result != null) {
+                            CoordenadasViajeEvent event = new CoordenadasViajeEvent();
+                            event.setObject(result);
+                            EventBus.getDefault().post(event);
+                        } else {
+                            Log.d("Remiscar* ", "error en respuesta de Mcoordenadas.");
                         }
                     }
                 });

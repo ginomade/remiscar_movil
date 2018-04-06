@@ -12,28 +12,29 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 // pantalla de datos de novedades para el movil
 public class CamUsuActivity extends Activity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mnovedades.php";
-    private static final String URL_venc = "http://carlitosbahia.dynns.com/legajos/viajes/Mvencimientos.php";
-    private static final String URL_calles = "http://carlitosbahia.dynns.com/legajos/viajes/buscar.php";
     private static final String URL_CamUsu = "http://carlitosbahia.dynns.com/legajos/viajes/Mcamusu.php";
     private static final String URL_Cambio = "http://carlitosbahia.dynns.com/legajos/viajes/Mcambio.php";
 
     Button buttonInicio, buttonCamUsu ;
 
     String params;
+    SharedPrefsUtil sharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camusu);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        String imei = settings.getString("imei", "");
-        String movil = settings.getString("movil", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(CamUsuActivity.this);
+
+        String imei = sharedPrefs.getString("imei", "");
+        String movil = sharedPrefs.getString("movil", "");
 
         params = "?IMEI="+imei+"&Movil="+movil;
 

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -35,6 +36,7 @@ public class PanicActivity extends Activity {
     private String imei, Direccion, movil, geopos;
     String TAG_SUCCESS = "result";
 
+    SharedPrefsUtil sharedPrefs;
 
     private ProgressDialog pDialog;
     //coordenadas del movil.
@@ -45,18 +47,19 @@ public class PanicActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_panic);
 
-        imei = getPhoneImei();
+        sharedPrefs = SharedPrefsUtil.getInstance(PanicActivity.this);
+
+        imei = sharedPrefs.getString("imei", "");
         //imei = "359015062458232";//TEST/////
         //coordenadas del movil.
         latmovil = 0.0;
         lonmovil = 0.0;
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        movil = settings.getString("movil", "");
-        Direccion = settings.getString("Direccion", "");
-        geopos = settings.getString("geopos", "");
-        latmovil = (double) settings.getFloat("latmovil", 0);
-        lonmovil = (double) settings.getFloat("lonmovil", 0);
+        movil = sharedPrefs.getString("movil", "");
+        Direccion = sharedPrefs.getString("Direccion", "");
+        geopos = sharedPrefs.getString("geopos", "");
+        latmovil = (double) sharedPrefs.getFloat("latmovil", 0);
+        lonmovil = (double) sharedPrefs.getFloat("lonmovil", 0);
 
         edit = (EditText) findViewById(R.id.editText3);
         prueba = (Button) findViewById(R.id.buttonPrueba);
@@ -120,16 +123,6 @@ public class PanicActivity extends Activity {
 
         super.onBackPressed();
         finish();
-    }
-
-    //Obtener numero de imei
-    private String getPhoneImei() {
-        TelephonyManager mTelephonyManager;
-        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-
-        }
-        return mTelephonyManager.getDeviceId();
     }
 
     public void processAlert(String type) {

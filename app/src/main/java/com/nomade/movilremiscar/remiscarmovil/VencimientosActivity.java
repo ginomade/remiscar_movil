@@ -12,6 +12,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 // pantalla de datos por zonas
 public class VencimientosActivity extends AppCompatActivity {
 
@@ -19,12 +21,9 @@ public class VencimientosActivity extends AppCompatActivity {
     private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mvencimientos.php";
 
     Button buttonInicio;
-    String params;
-    String TAG_SUCCESS = "result";
 
-    JSONParser jsonParser = new JSONParser();
-
-    String movil, resp;
+    String movil;
+    SharedPrefsUtil sharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +31,8 @@ public class VencimientosActivity extends AppCompatActivity {
         setContentView(R.layout.activity_vencimientos);
 
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        movil = settings.getString("movil", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(VencimientosActivity.this);
+        movil = sharedPrefs.getString("movil", "");
 
         mWebView = (WebView) findViewById(R.id.webView3);
 

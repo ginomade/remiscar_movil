@@ -20,6 +20,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 // pantalla con detalles de alerta recibida desde otro movil
 public class AlertaActivity extends Activity implements OnMapReadyCallback {
@@ -33,6 +34,8 @@ public class AlertaActivity extends Activity implements OnMapReadyCallback {
 
     Button buttonInicio;
 
+    SharedPrefsUtil sharedPrefs;
+
     Handler mHandler;
     //seteo de intervalo de actualizacion de datos
     private final static int INTERVAL = 20 * 1000; // segundos
@@ -43,6 +46,8 @@ public class AlertaActivity extends Activity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alerta);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        sharedPrefs = SharedPrefsUtil.getInstance(AlertaActivity.this);
 
         try {
             mHandler = new Handler();
@@ -67,16 +72,16 @@ public class AlertaActivity extends Activity implements OnMapReadyCallback {
 
     private void getData() {
         try {
-            SharedPreferences settings = getSharedPreferences("RemisData", 0);
-            al_status = settings.getString("al_status", "");
-            imei = settings.getString("imei", "");
-            mimovil = settings.getString("movil", "");
+
+            al_status = sharedPrefs.getString("al_status", "");
+            imei = sharedPrefs.getString("imei", "");
+            mimovil = sharedPrefs.getString("movil", "");
             if (al_status.equals("ALERTA")) {
                 Log.d("Remiscar AL", "dataAlerta:" + al_fecha + "-" + al_movil + "-" + al_ubicacion + "-" + al_geopos);
-                al_geopos = settings.getString("al_geopos", "");
-                al_movil = settings.getString("al_movil", "");
-                al_fecha = settings.getString("al_fecha", "");
-                al_ubicacion = settings.getString("al_ubicacion", "");
+                al_geopos = sharedPrefs.getString("al_geopos", "");
+                al_movil = sharedPrefs.getString("al_movil", "");
+                al_fecha = sharedPrefs.getString("al_fecha", "");
+                al_ubicacion = sharedPrefs.getString("al_ubicacion", "");
 
 
                 showData();

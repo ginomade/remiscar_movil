@@ -2,7 +2,6 @@ package com.nomade.movilremiscar.remiscarmovil;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,6 +27,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -42,9 +43,9 @@ import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 import com.nomade.movilremiscar.remiscarmovil.events.AlertEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.AutoEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
-import com.nomade.movilremiscar.remiscarmovil.events.MActualEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
@@ -82,15 +83,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     LinearLayout layZonas;
 
     String carlitos, carlibres, bahia, bahialibres, status, movil, geopos;
-    String HCubierto, Origen, Pasajero, ObtDestino, Traslados, CantViajes,
-            ZonaDestino, ObtAgencia, Observaciones, ObtCoordenadas;
+    String Origen, Traslados, ZonaDestino, ObtCoordenadas;
     String al_status, al_geopos, al_movil, al_fecha, al_ubicacion;
 
-    TextView textCarlitos, textLibres, textBahia, textLibresB, textOrigen, textDestino, textPasajero,
-            textHoraViaje, textEmpresa, textObs, textStatus, textNroMovil;
+    TextView textCarlitos, textLibres, textBahia, textLibresB, textStatus, textNroMovil;
 
 
     File outfile = null;
+
+    WebView mWebView;
 
     /////////////TEST/////////////
     // setear a true para generar el log en memoria sd del equipo.
@@ -164,11 +165,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         initializeUI();
 
+        setMainView();
+
+    }
+
+    private void setMainView() {
+        mWebView = (WebView) findViewById(R.id.webViewMain);
+
+        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        mWebView.loadUrl(ServiceUtils.url_main);
     }
 
     private void initializeUI() {
         frmStatusLoc = (FrameLayout) findViewById(R.id.frmStatusLoc);
-        frmStatusOrigen = (FrameLayout) findViewById(R.id.frmStatusOrigen);
         buttonInicio = (Button) findViewById(R.id.buttonInicio);
         buttonInicio.setOnClickListener(new View.OnClickListener() {
 
@@ -209,20 +219,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
 
         });
-
-        buttonViajes = (Button) findViewById(R.id.buttonViajes);
-        buttonViajes.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-
-                Intent intent = new Intent(MainActivity.this, ViajesActivity.class);
-                startActivity(intent);
-
-            }
-
-        });
-
 
         buttonCobrar = (Button) findViewById(R.id.buttonCobrar);
         buttonCobrar.setOnClickListener(new View.OnClickListener() {
@@ -268,16 +264,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
 
         //datos en pantalla desde Mactual
-        textCarlitos = (TextView) findViewById(R.id.textCarlitos);
-        textLibres = (TextView) findViewById(R.id.textLibres);
-        textBahia = (TextView) findViewById(R.id.textBahia);
-        textLibresB = (TextView) findViewById(R.id.textLibresB);
-        textOrigen = (TextView) findViewById(R.id.textOrigen);
-        textDestino = (TextView) findViewById(R.id.textDestino);
-        textPasajero = (TextView) findViewById(R.id.textPasajero);
-        textEmpresa = (TextView) findViewById(R.id.textEmpresa);
-        textObs = (TextView) findViewById(R.id.textObs);
-        textHoraViaje = (TextView) findViewById(R.id.textHoraViaje);
         textStatus = (TextView) findViewById(R.id.textStatus);
         textNroMovil = (TextView) findViewById(R.id.textNroMovil);
         textStatus.addTextChangedListener(new TextWatcher() {
@@ -482,8 +468,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ObtCoordenadas = "";
         Origen = "";
         ZonaDestino = "";
-        imei = getPhoneImei();
-        //imei = "359015062458232";//TEST/////
+        //imei = getPhoneImei();
+        imei = "359015062458232";//TEST/////
         SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
         settings.saveFloat("latmovil", 0);
         settings.saveFloat("lonmovil", 0);
@@ -716,6 +702,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
+    private void processUbicacionViaje(CoordenadasViajeEvent result) {
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     private void processLocation(LocationEvent result) {
         String data = result.getObject();
         Log.d("REMISCAR - ", " ADDRESS- POST LOCATION");
@@ -808,8 +799,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 textNroMovil.setText(movil);
                 sharedPrefs.saveString("movil", movil);
                 sharedPrefs.saveString("imei", imei);
-                ServiceUtils.asMActual(mContext, status,
-                        Direccion, geopos);
 
                 pollingManager.startRepeatingTask();
 
@@ -824,130 +813,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 finish();
             }
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processMActual(MActualEvent event) {
-
-        try {
-            JsonObject data = event.getObject();
-            Log.d("Remiscar MAc Res- ", data.toString());
-            logToSdcard("Remiscar MAc Res- ", data.toString());
-            int success = data.get(TAG_SUCCESS).getAsInt();
-            carlitos = data.get("carlitos").getAsString();
-            carlibres = data.get("carlibres").getAsString();
-            bahia = data.get("bahia").getAsString();
-            bahialibres = data.get("bahialibres").getAsString();
-            status = data.get("status").getAsString();
-            if (data.has("Origen")) {
-                Origen = data.get("Origen").getAsString();
-            }
-            if (data.has("ObtDestino")) {
-                ObtDestino = data.get("ObtDestino").getAsString();
-            }
-            if (data.has("Pasajero")) {
-                Pasajero = data.get("Pasajero").getAsString();
-            }
-            if (data.has("ObtAgencia")) {
-                ObtAgencia = data.get("ObtAgencia").getAsString();
-            }
-            if (data.has("Observaciones")) {
-                Observaciones = data.get("Observaciones").getAsString();
-            }
-            if (data.has("HCubierto")) {
-                HCubierto = data.get("HCubierto").getAsString();
-            }
-            if (data.has("Traslados")) {
-                Traslados = data.get("Traslados").getAsString();
-            }
-            if (data.has("ObtCoordenadas")) {
-                ObtCoordenadas = data.get("ObtCoordenadas").getAsString();
-            }
-
-            Log.d("REMISCAR - ", String.valueOf(success));
-            logToSdcard("REMISCAR - ", String.valueOf(success));
-
-            if (success == 0) {
-
-                String resultLoc = "";
-                textCarlitos.setText(carlitos);
-                textLibres.setText(carlibres);
-                textBahia.setText(bahia);
-                textLibresB.setText(bahialibres);
-                textStatus.setText(status);
-                frmStatusOrigen.setBackgroundColor(Color.parseColor("#fff4b2"));
-
-                sharedPrefs.saveString("latlonOrigen", resultLoc);
-                sharedPrefs.saveString("movil", movil);
-                sharedPrefs.saveString("status", status);
-                sharedPrefs.saveString("imei", imei);
-
-                if (status == "LIBRE") {
-                    buttonInicio.setBackgroundColor(Color.parseColor("#1FA9FF"));
-                    buttonCobrar.setBackgroundColor(Color.parseColor("#1FA9FF"));
-                    textStatus.setTextColor(Color.GREEN);//color de texto status
-
-                    textOrigen.setText("");
-                    textDestino.setText("");
-                    textPasajero.setText("");
-                    textEmpresa.setText("");
-                    textObs.setText("");
-                    textHoraViaje.setText("");
-                } else {
-
-                    textStatus.setTextColor(Color.RED);//color de texto status
-
-                    textOrigen.setText(Origen);
-                    textDestino.setText(ObtDestino);
-                    textPasajero.setText(Pasajero);
-                    textEmpresa.setText(ObtAgencia);
-                    textObs.setText(Observaciones);
-                    textHoraViaje.setText(HCubierto);
-                }
-
-                //si tengo coordenadas las envio, sino busco por el dato de origen.
-                if (ObtCoordenadas.equals("")) {
-                    ///////////////TEST///////////////////
-                    //Origen="1200 alem";
-                    ///////////////TEST///////////////////
-                    Log.d("REMISCAR - ", "origen -- " + Origen);
-                    logToSdcard("REMISCAR - ", "origen -- " + Origen);
-
-                    if (Origen.equals("")) {
-
-                        resultLoc = "";
-                        sharedPrefs.saveString("latlonOrigen", resultLoc);
-
-                    } else {
-                        if (flg_origen == 0) getAddressLocation();
-                        // busco si el numero de la direccion viene primero
-                        /*if(Origen.substring(0, 1).matches("[0-9]")){
-                            Log.d("REMISCAR - ","origen --NUMERO ");
-                            getAddressLocation();
-                        }else{
-                            Origen="";
-                        }*/
-
-
-                    }
-                } else {
-                    resultLoc = ObtCoordenadas;
-                    sharedPrefs.saveString("latlonOrigen", resultLoc);
-                    frmStatusOrigen.setBackgroundColor(Color.parseColor("#00ff00"));
-                    //-34.935506,-57.9556878
-                    //editor.putString("latlonOrigen","-34.935506,-57.9");
-
-                }
-
-            } else if (success == 2) {
-                Toast.makeText(getApplicationContext(), "App solo para propietarios autorizados.", Toast.LENGTH_SHORT)
-                        .show();
-                finish();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)

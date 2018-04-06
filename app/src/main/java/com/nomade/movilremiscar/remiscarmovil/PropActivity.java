@@ -1,7 +1,6 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -15,15 +14,17 @@ public class PropActivity extends Activity {
     WebView mWebView;
     private static final String URL_prop = "http://carlitosbahia.dynns.com/legajos/viajes/Mactual1.php";
 
+    SharedPrefsUtil sharedPrefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prop);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        String movil = settings.getString("movil", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(PropActivity.this);
+        String movil = sharedPrefs.getString("movil", "");
+        String imei = sharedPrefs.getString("imei", "");
 
-        String imei = SharedPrefsUtil.getInstance(PropActivity.this).getString("imei", "");
         String url = URL_prop + "?IMEI=" + imei + "&Movil=" + movil;
         mWebView = (WebView) findViewById(R.id.webView2);
 

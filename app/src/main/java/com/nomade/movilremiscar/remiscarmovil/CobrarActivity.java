@@ -9,19 +9,23 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 // pantalla de datos de viajes para el movil
 public class CobrarActivity extends AppCompatActivity {
 
     WebView mWebView;
     private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mcobro.php";
 
+    SharedPrefsUtil sharedPrefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cobrar);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        String movil = settings.getString("movil", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(CobrarActivity.this);
+        String movil = sharedPrefs.getString("movil", "");
 
         mWebView = (WebView) findViewById(R.id.webView);
 
