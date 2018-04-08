@@ -1,6 +1,5 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -9,13 +8,14 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 // pantalla de datos de viajes para el movil
 public class CobrarActivity extends AppCompatActivity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mcobro.php";
+    private static final String URL = ServiceUtils.base_url + "Mcobro.php";
 
     SharedPrefsUtil sharedPrefs;
 

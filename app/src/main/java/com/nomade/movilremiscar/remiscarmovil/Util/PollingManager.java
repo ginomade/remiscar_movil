@@ -37,10 +37,13 @@ public class PollingManager {
         public void run() {
 
 
-            ServiceUtils.asAuto(mContext);
+
             if(Utils.esMultiplo(clearCacheCounter, 5)){
+                // con n=5 y INTERVAL = 20 segundos ejecuta cada 1 minuto
+                ServiceUtils.asAuto(mContext);
                 ServiceUtils.asMensaje(mContext);
                 ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""), prefs.getString("geopos", ""));
+
             }
 
             clearCacheCounter++; // 180 == 1 hora

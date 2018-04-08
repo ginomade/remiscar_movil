@@ -39,21 +39,21 @@
                 android:textSize="20dp"
                 style="@style/ButtonText"
                 android:id="@+id/buttonVenc"
-                android:background="#4863a0" />
+                android:background="#0288D1" />
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:text="Calles"
                 style="@style/ButtonText"
                 android:id="@+id/buttonCalles"
-                android:background="#4863a0" />
+                android:background="#0288D1" />
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="Empresas"
                 style="@style/ButtonText"
                 android:id="@+id/buttonEmpresas"
-                android:background="#4863a0" />
+                android:background="#0288D1" />
         </LinearLayout>
         </ScrollView>
         <LinearLayout
@@ -69,7 +69,7 @@
                 android:text="Volver"
                 style="@style/ButtonText"
                 android:id="@+id/buttonInicio"
-                android:background="#4863a0"
+                android:background="#0288D1"
                 android:layout_weight="1.03" />
             <Button
                 android:layout_width="192dp"
@@ -77,7 +77,7 @@
                 android:text="Cambio Movil"
                 style="@style/ButtonText"
                 android:id="@+id/buttonCamUsu"
-                android:background="#4863a0" />
+                android:background="#0288D1" />
         </LinearLayout>
     </LinearLayout>
 

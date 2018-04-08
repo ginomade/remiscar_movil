@@ -20,6 +20,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 // pantalla con detalles de alerta recibida desde otro movil
@@ -30,7 +31,7 @@ public class AlertaActivity extends Activity implements OnMapReadyCallback {
     Double lat, lon;
 
 
-    private static String url_alerta = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanicoalerta.php";
+    private static String url_alerta = ServiceUtils.base_url + "Mpanicoalerta.php";
 
     Button buttonInicio;
 

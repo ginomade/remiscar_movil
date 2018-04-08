@@ -27,14 +27,15 @@ import java.net.URLEncoder;
 
 public class ServiceUtils {
 
-    private static String url_validacion = "http://carlitosbahia.dynns.com/legajos/viajes/Mvalidacion.php";
-    private static String url_iniciofin = "http://carlitosbahia.dynns.com/legajos/viajes/Miniciofin.php";
-    private static String url_alerta = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanicoalerta.php";
-    private static String url_mensaje = "http://carlitosbahia.dynns.com/legajos/viajes/Mmensajes.php";
-    private static String url_auto = "http://carlitosbahia.dynns.com/legajos/viajes/Mauto.php";
-    private static String url_panico = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanico.php";
-    public static String url_main = "http://carlitosbahia.dynns.com/legajos/viajes/Mviajeshoy.php";
-    private static String url_ubicacionViaje = "http://carlitosbahia.dynns.com/legajos/viajes/Mcoordenadas.php";
+    public static String base_url = "http://carlitosbahia.dynns.com/legajos/viajes/2018/";
+    private static String url_validacion = base_url + "Mvalidacion.php";
+    private static String url_iniciofin = base_url + "Miniciofin.php";
+    private static String url_alerta = base_url + "Mpanicoalerta.php";
+    private static String url_mensaje = base_url + "Mmensajes.php";
+    private static String url_auto = base_url + "Mauto.php";
+    private static String url_panico = base_url + "Mpanico.php";
+    public static String url_main = base_url + "Mviajeshoy.php";
+    private static String url_ubicacionViaje = base_url + "Mcoordenadas.php";
 
     public static void asMensaje(Context context) {
 
@@ -58,11 +59,11 @@ public class ServiceUtils {
     }
 
     public static void asCoordenadas(Context context) {
-
+        String finalUrl = url_ubicacionViaje
+                + "?Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
+                + "&IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "");
         Ion.with(context)
-                .load(url_ubicacionViaje)
-                .setBodyParameter("Movil", SharedPrefsUtil.getInstance(context).getString("movil", ""))
-                .setBodyParameter("IMEI", SharedPrefsUtil.getInstance(context).getString("imei", ""))
+                .load(finalUrl)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
@@ -105,9 +106,9 @@ public class ServiceUtils {
      * new PanicTask().execute("ALERTA", url_panico);
      */
     public static void asPanic(Context context,
-                         String statusIn,
-                         String direccion,
-                         String geopos) {
+                               String statusIn,
+                               String direccion,
+                               String geopos) {
         String status = statusIn;
         String url_params = url_panico + "?status=" + status +
                 "&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") +
@@ -134,12 +135,12 @@ public class ServiceUtils {
      * Background Async Task Inicio y fin viaje
      */
     public static void asInicioFin(String task,
-                             Context context,
-                             String origen,
-                             String traslados,
-                             String zonaDestino,
-                             String direccion,
-                             String geopos) {
+                                   Context context,
+                                   String origen,
+                                   String traslados,
+                                   String zonaDestino,
+                                   String direccion,
+                                   String geopos) {
         String orig = "";
         if (task.equals("inicio")) {
             orig = origen;
@@ -179,8 +180,8 @@ public class ServiceUtils {
      * Background Async Task verificar status de Panico
      */
     public static void asAlert(Context context,
-                         String direccion,
-                         String geopos) {
+                               String direccion,
+                               String geopos) {
         String url_params = url_alerta + "?IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
                 "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") + "&Ubicacion=" + direccion + "&GeoPos=" + geopos + "&movil_al=";
         Ion.with(context)

@@ -12,13 +12,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 // pantalla de datos por zonas
 public class VencimientosActivity extends AppCompatActivity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mvencimientos.php";
+    private static final String URL = ServiceUtils.base_url + "Mvencimientos.php";
 
     Button buttonInicio;
 

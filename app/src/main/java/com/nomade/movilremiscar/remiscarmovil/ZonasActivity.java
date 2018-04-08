@@ -13,14 +13,15 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 //pantalla de datos de viajes
 public class ZonasActivity extends AppCompatActivity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mzonas.php";
-    private static final String URL_CA = "http://carlitosbahia.dynns.com/legajos/viajes/MzonasCA.php";
+    private static final String URL = ServiceUtils.base_url + "Mzonas.php";
+    private static final String URL_CA = ServiceUtils.base_url + "MzonasCA.php";
     Button buttonInicio;
     Button Crono;
 

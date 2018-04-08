@@ -12,13 +12,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 //pantalla de datos de viajes
 public class CopiadoActivity extends AppCompatActivity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mcopiado.php";
+    private static final String URL = ServiceUtils.base_url + "Mcopiado.php";
 
     Button buttonInicio;
 
