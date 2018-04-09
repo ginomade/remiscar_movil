@@ -57,6 +57,7 @@ public class PollingManager {
                 // 25 corresponde a 5 minutos con Interval=20 segundos.
                 mProcessDelay = 0;
                 ServiceUtils.asCoordenadas(mContext);
+                ServiceUtils.asMensaje(mContext);
             }
             mProcessDelay++;
 

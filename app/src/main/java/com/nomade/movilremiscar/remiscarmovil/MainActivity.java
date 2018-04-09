@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         initializeUI();
         inicializarDatos();
-        checkConnection();
+        //checkConnection();
 
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -186,8 +186,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei + "&Movil=" + movil;
         mWebView = (WebView) findViewById(R.id.webViewMain);
 
-        mWebView.clearCache(false);
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        //mWebView.clearCache(false);
+        //mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+
         mWebView.setWebViewClient(mainWebClient);
         mWebView.loadUrl(finalUrl);
     }
@@ -387,8 +389,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ObtCoordenadas = "";
         Origen = "";
         ZonaDestino = "";
-        imei = getPhoneImei();
-        //imei = "359015062458232";//TEST/////
+        //imei = getPhoneImei();
+        imei = "359015062458232";//TEST/////
         SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
         settings.saveFloat("latmovil", 0);
         settings.saveFloat("lonmovil", 0);
@@ -447,9 +449,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onResume() {
         super.onResume();
-        pollingManager.startRepeatingTask();
+        //pollingManager.startRepeatingTask();
         EventBus.getDefault().register(this);
-        locationHelper.onResume(MainActivity.this);
+        //locationHelper.onResume(MainActivity.this);
     }
 
     @Override
