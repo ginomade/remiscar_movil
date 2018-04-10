@@ -31,8 +31,6 @@ public class CobrarActivity extends AppCompatActivity {
 
         mWebView.setWebChromeClient(new WebChromeClient());
 
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
         mWebView.loadUrl(URL);
 
     }

@@ -40,8 +40,6 @@ public class CallesActivity extends Activity {
 
         mWebView.setWebChromeClient(new WebChromeClient());
 
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
         mWebView.setWebViewClient(yourWebClient);
 
         String fullUrl = URL + "?Movil=" + movil;

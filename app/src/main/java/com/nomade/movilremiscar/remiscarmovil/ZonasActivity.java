@@ -42,8 +42,6 @@ public class ZonasActivity extends AppCompatActivity {
 
         mWebView.setWebChromeClient(new WebChromeClient());
 
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
         mWebView.setWebViewClient(yourWebClient);
 
         String fullUrl = URL + "?Movil=" + movil + "&imei=" + imei + "&geopos=" + geopos;

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -30,7 +31,7 @@ public class PanicActivity extends Activity {
     Button prueba, alerta, inicio;
     EditText edit;
 
-    private static String url_panico = "http://carlitosbahia.dynns.com/legajos/viajes/Mpanico.php";
+    private static String url_panico = ServiceUtils.base_url + "Mpanico.php";
 
 
     private String imei, Direccion, movil, geopos;

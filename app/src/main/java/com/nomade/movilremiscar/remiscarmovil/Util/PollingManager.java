@@ -43,7 +43,7 @@ public class PollingManager {
                 ServiceUtils.asAuto(mContext);
                 ServiceUtils.asMensaje(mContext);
                 ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""), prefs.getString("geopos", ""));
-
+                ServiceUtils.asCoordenadas(mContext);
             }
 
             clearCacheCounter++; // 180 == 1 hora
@@ -56,7 +56,7 @@ public class PollingManager {
             if(mProcessDelay >= 25){
                 // 25 corresponde a 5 minutos con Interval=20 segundos.
                 mProcessDelay = 0;
-                ServiceUtils.asCoordenadas(mContext);
+                //ServiceUtils.asCoordenadas(mContext);
                 ServiceUtils.asMensaje(mContext);
             }
             mProcessDelay++;

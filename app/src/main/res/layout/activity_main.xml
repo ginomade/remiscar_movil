@@ -47,20 +47,21 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginStart="10dp"
+                            android:layout_toRightOf="@id/textMovilText"
                             android:text="00"
+                            android:textStyle="bold"
                             android:textColor="#ff000fff"
-                            android:textSize="25dp" />
+                            android:textSize="30dp" />
 
                         <TextView
-                            android:id="@+id/textStatus"
+                            android:id="@+id/textMovilText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginStart="10dp"
-                            android:layout_toRightOf="@id/textNroMovil"
-                            android:text="---------"
+                            android:text="Movil"
                             android:textColor="#ffff0000"
-                            android:textSize="19dp" />
+                            android:textSize="14dp" />
                     </RelativeLayout>
 
                 <Button

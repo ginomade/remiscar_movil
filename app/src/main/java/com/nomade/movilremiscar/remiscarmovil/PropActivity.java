@@ -31,8 +31,6 @@ public class PropActivity extends Activity {
 
         mWebView.setWebViewClient(yourWebClient);
 
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
         mWebView.loadUrl(url);
     }
 

@@ -13,17 +13,15 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -82,10 +80,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     ImageButton reloadButton;
 
     String carlitos, carlibres, bahia, bahialibres, status, movil, geopos;
-    String Origen, Traslados, ZonaDestino, ObtCoordenadas;
+    String Origen, ZonaDestino, ObtCoordenadas;
     String al_status, al_geopos, al_movil, al_fecha, al_ubicacion;
 
-    TextView textStatus, textNroMovil;
+    TextView textNroMovil;
 
 
     File outfile = null;
@@ -174,11 +172,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ServiceUtils.asAuto(mContext);
         ServiceUtils.asMensaje(mContext);
         ServiceUtils.asCoordenadas(mContext);
-        /*if (lat == 0.0) {
-            Location newLocation = locationHelper.getLastLocation();
-            lat = newLocation.getLatitude();
-            lon = newLocation.getLongitude();
-        }*/
     }
 
     private void setMainView() {
@@ -200,6 +193,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             mWebView.loadUrl(url);
             return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            view.scrollTo(0, 0);
+            view.pageUp(true);
+
         }
 
         // here you execute an action when the URL you want is about to load
@@ -262,26 +263,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
 
         //datos en pantalla desde Mactual
-        textStatus = (TextView) findViewById(R.id.textStatus);
         textNroMovil = (TextView) findViewById(R.id.textNroMovil);
-        textStatus.addTextChangedListener(new TextWatcher() {
-            public void afterTextChanged(Editable s) {
-                // you can call or do what you want with your EditText here
-                if (textStatus.getText() == "LIBRE") {
-                    textStatus.setTextColor(Color.parseColor("#00ff00"));
-                } else {
-                    textStatus.setTextColor(Color.parseColor("#ff0000"));
-                }
-
-            }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-        });
-
 
         frmAlerta = (FrameLayout) findViewById(R.id.frmAlerta);
         frmAlerta.setVisibility(View.GONE);
@@ -331,7 +313,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         } else {
 
             // permission denied.
-            //Toast.makeText(getBaseContext(), "Permissions need to be granted.", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "Faltan permisos necesarios para funcionar.", Toast.LENGTH_LONG).show();
+            finish();
         }
 
     }
@@ -449,9 +432,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onResume() {
         super.onResume();
-        //pollingManager.startRepeatingTask();
+        pollingManager.startRepeatingTask();
         EventBus.getDefault().register(this);
-        //locationHelper.onResume(MainActivity.this);
+        locationHelper.onResume(MainActivity.this);
     }
 
     @Override
@@ -521,7 +504,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             e.printStackTrace();
             if (t == "1")
-                Toast.makeText(getApplicationContext(), "Could not get address..!", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "Could not get address..!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -707,6 +690,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             } else if (success == 1) {
                 //inicio valido para movil autorizado
+                Log.w("Remiscar", "VALIDACION - " + movil + " - " + imei);
                 textNroMovil.setText(movil);
                 sharedPrefs.saveString("movil", movil);
                 sharedPrefs.saveString("imei", imei);
@@ -715,11 +699,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
             } else if (success == 0) {
-                Toast.makeText(getApplicationContext(), "App solo para propietarios autorizados.", Toast.LENGTH_SHORT)
+                Toast.makeText(mContext, "App solo para propietarios autorizados.", Toast.LENGTH_SHORT)
                         .show();
                 finish();
             } else {
-                Toast.makeText(getApplicationContext(), "No se pudo conectar. Intente de nuevo.", Toast.LENGTH_SHORT)
+                Toast.makeText(mContext, "No se pudo conectar. Intente de nuevo.", Toast.LENGTH_SHORT)
                         .show();
                 finish();
             }
@@ -917,5 +901,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onPollingStep(PollingEvent event) {
         pa = 0;//reset boton de panico
         flg_origen = 0;
+        if(textNroMovil.getText().toString().equals("00")){
+            textNroMovil.setText(movil.toString());
+        }
     }
 }

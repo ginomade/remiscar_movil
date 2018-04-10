@@ -43,10 +43,7 @@ public class CamUsuActivity extends Activity {
         webSettings.setJavaScriptEnabled(true); // Enable Javascript.
         mWebView.setWebViewClient(yourWebClient);
 
-        webSettings.setAllowFileAccessFromFileURLs(true);  // Enable HTML Imports to access file://.
-        //webSettings.setAllowUniversalAccessFromFileURLs(true);
-
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setAllowFileAccessFromFileURLs(true);
 
         mWebView.loadUrl(URL_Cambio + params);
 

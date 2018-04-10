@@ -55,8 +55,6 @@ public class ViajesActivity extends AppCompatActivity implements LocationListene
 
         mWebView.setWebChromeClient(new WebChromeClient());
 
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
         mWebView.setWebViewClient(yourWebClient);
 
         reloadWebviewData();
