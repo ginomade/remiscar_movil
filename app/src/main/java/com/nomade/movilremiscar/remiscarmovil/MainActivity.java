@@ -4,7 +4,9 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Picture;
 import android.location.Location;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -13,11 +15,11 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -154,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         initializeUI();
         inicializarDatos();
-        //checkConnection();
+        checkConnection();
 
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -167,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+
     private void iniciarServicios() {
         setMainView();
         ServiceUtils.asAuto(mContext);
@@ -176,38 +179,67 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private void setMainView() {
 
-        String finalUrl = ServiceUtils.url_main + "?imei=" + imei + "&Movil=" + movil;
+        String finalUrl = ServiceUtils.url_main + "?imei=" + imei
+                + "&Movil=" + movil
+                + "&geopos=" + geopos;
         mWebView = (WebView) findViewById(R.id.webViewMain);
-
-        //mWebView.clearCache(false);
-        //mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-
 
         mWebView.setWebViewClient(mainWebClient);
         mWebView.loadUrl(finalUrl);
+
     }
 
     WebViewClient mainWebClient = new WebViewClient() {
         // you tell the webclient you want to catch when a url is about to load
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            Log.w("Remiscar", "---------------- webview scrollY " + mWebView.getTranslationY());
+            Log.w("Remiscar", "---------------- view scrollY " + view.getScrollY());
+            view.setScrollY(0);
             mWebView.loadUrl(url);
+
             return true;
         }
 
         @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+            //view.setVisibility(View.GONE);
+        }
+
+
+        @Override
         public void onPageFinished(WebView view, String url) {
-            super.onPageFinished(view, url);
-            view.scrollTo(0, 0);
-            view.pageUp(true);
+            final WebView newView = view;
+
+
+                newView.postDelayed(new Runnable() {
+                    public void run() {
+                        if (newView.getProgress() == 100) {
+                            newView.postDelayed(new Runnable() {
+                                public void run() {
+                                    newView.scrollTo(0, 0);
+                                    //pageloaded = true;
+                                }
+                            }, 10);
+                        } else {
+                            newView.post(this);
+                        }
+                    }
+                }, 100);
+
 
         }
+
+
 
         // here you execute an action when the URL you want is about to load
         @Override
         public void onLoadResource(WebView view, String url) {
 
         }
+
+
     };
 
     private void initializeUI() {
@@ -272,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             @Override
             public void onClick(View arg0) {
-
+                getSingleLocation();
                 Intent intent = new Intent(MainActivity.this, AlertaActivity.class);
                 startActivity(intent);
 
@@ -372,8 +404,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ObtCoordenadas = "";
         Origen = "";
         ZonaDestino = "";
-        //imei = getPhoneImei();
-        imei = "359015062458232";//TEST/////
+        imei = getPhoneImei();
+        //imei = "359015062458232";//TEST/////
         SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
         settings.saveFloat("latmovil", 0);
         settings.saveFloat("lonmovil", 0);
@@ -435,6 +467,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         pollingManager.startRepeatingTask();
         EventBus.getDefault().register(this);
         locationHelper.onResume(MainActivity.this);
+
+    }
+
+    private void getSingleLocation() {
+        if(sharedPrefs != null) {
+            Location singleLocation = locationHelper.getLastLocation();
+            sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
+            sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
+        }
     }
 
     @Override
@@ -787,6 +828,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Subscribe()
     public void processMensaje(MensajeEvent data) {
+        //reenvio a url de Mviajeshoy.php para actualizar datos de geopos.
+        setMainView();
+
         int success;
         JsonObject result = new JsonObject();
         result = data.getObject();
@@ -901,8 +945,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onPollingStep(PollingEvent event) {
         pa = 0;//reset boton de panico
         flg_origen = 0;
-        if(textNroMovil.getText().toString().equals("00")){
+        if (textNroMovil.getText().toString().equals("00")) {
             textNroMovil.setText(movil.toString());
         }
+
     }
 }
