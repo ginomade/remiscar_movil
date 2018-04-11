@@ -193,20 +193,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         // you tell the webclient you want to catch when a url is about to load
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            Log.w("Remiscar", "---------------- webview scrollY " + mWebView.getTranslationY());
-            Log.w("Remiscar", "---------------- view scrollY " + view.getScrollY());
             view.setScrollY(0);
             mWebView.loadUrl(url);
 
             return true;
         }
-
-        @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-            //view.setVisibility(View.GONE);
-        }
-
 
         @Override
         public void onPageFinished(WebView view, String url) {
@@ -377,14 +368,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             try {
 
 
-                FileOutputStream fOut = new FileOutputStream(outfile, true);
-                OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-                myOutWriter.append(currentDateandTime + " " + tag + "     ");
-                myOutWriter.append(statement);
-                myOutWriter.append("\n");
-                myOutWriter.flush();
-                myOutWriter.close();
-                fOut.close();
+                try (FileOutputStream fOut = new FileOutputStream(outfile, true)) {
+                    OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                    myOutWriter.append(currentDateandTime + " " + tag + "     ");
+                    myOutWriter.append(statement);
+                    myOutWriter.append("\n");
+                    myOutWriter.flush();
+                    myOutWriter.close();
+                    fOut.close();
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -404,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ObtCoordenadas = "";
         Origen = "";
         ZonaDestino = "";
+        movil = "";
         imei = getPhoneImei();
         //imei = "359015062458232";//TEST/////
         SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
@@ -457,16 +450,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onPause() {
         super.onPause();
         pollingManager.stopRepeatingTask();
-        EventBus.getDefault().unregister(this);
         locationHelper.onPause();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        pollingManager.startRepeatingTask();
         EventBus.getDefault().register(this);
         locationHelper.onResume(MainActivity.this);
+        pollingManager.startRepeatingTask();
 
     }
 
@@ -947,6 +940,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         flg_origen = 0;
         if (textNroMovil.getText().toString().equals("00")) {
             textNroMovil.setText(movil.toString());
+        }
+        if(movil.equals("")){
+            ServiceUtils.asValidarUsuario(mContext);
         }
 
     }
