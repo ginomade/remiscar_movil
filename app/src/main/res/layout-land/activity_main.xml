@@ -13,6 +13,14 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:text="Remiscar Movil"
+            android:textColor="#ffffff"
+            android:background="#0288D1"
+            android:textSize="16dp" />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -22,169 +30,60 @@
             android:background="#d5d9ea">
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="0dp"
                 android:layout_height="fill_parent"
-                android:layout_weight=".40"
                 android:layout_margin="3dp"
-                android:background="#d5d9ea">
+                android:layout_weight=".20"
+                android:background="#d5d9ea"
+                android:orientation="vertical">
+
                 <LinearLayout
-                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="match_parent"
-                        android:layout_height="fill_parent"
-                        android:layout_weight="1">
-
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceLarge"
-                            android:text="00"
-                            android:layout_marginLeft="30dp"
-                            android:id="@+id/textNroMovil"
-                            android:textColor="#ff000fff"
-                            android:textSize="30dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceLarge"
-                            android:text="----------"
-                            android:id="@+id/textStatus"
-                            android:textColor="#ffff0000"
-                            android:textSize="19dp"
-                            android:layout_marginLeft="15dp" />
-                    </LinearLayout>
-                    <Button
-                        android:layout_width="match_parent"
-                        android:layout_height="fill_parent"
-                        style="@style/ButtonText"
-                        android:text="VIAJES"
-                        android:id="@+id/buttonViajes"
-                        android:layout_weight="1"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginBottom="5dp"
-                        android:background="#4863a0" />
-                </LinearLayout>
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:background="#4863a0"
-                    android:id="@+id/layZonas">
-                    <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                        android:layout_weight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
-                            android:layout_marginLeft="10dp"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="CARLITOS"
-                            android:id="@+id/textView4" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="0"
-                            android:id="@+id/textCarlitos"
-                            android:layout_marginLeft="10dp"
-                            android:textSize="20dp" />
-                    </LinearLayout>
+                    android:orientation="vertical">
 
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
-                            android:layout_marginLeft="10dp"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="Libres"
-                            android:id="@+id/textView6" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="0"
-                            android:id="@+id/textLibres"
-                            android:layout_marginLeft="10dp"
-                            android:textSize="20dp" />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
-                            android:layout_marginLeft="10dp"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="BAHIA"
-                            android:id="@+id/textView8" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="0"
-                            android:id="@+id/textBahia"
-                            android:layout_marginLeft="10dp"
-                            android:textSize="20dp" />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
-                            android:layout_marginLeft="10dp"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="Libres"
-                            android:id="@+id/textView10" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#ffffff"
 
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="0"
-                            android:id="@+id/textLibresB"
-                            android:layout_marginLeft="10dp"
-                            android:textSize="20dp" />
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/textNroMovil"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="30dp"
+                        android:text="00"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textColor="#ff000fff"
+                        android:textSize="30dp" />
+
+                    <TextView
+                        android:id="@+id/textStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:text="----------"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textColor="#ffff0000"
+                        android:textSize="19dp" />
                 </LinearLayout>
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="PROHIBIDO USAR AL CONDUCIR"
-                    android:id="@+id/textView20"
-                    android:textColor="#ffffff"
-                    android:background="#ff0000"
-                    android:layout_centerHorizontal="true"
-                    android:paddingLeft="5dp" />
+
+                <Button
+                    android:id="@+id/buttonMapa"
+                    style="@style/ButtonText"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="#0288D1"
+                    android:text="MAPA" />
+
+                <ImageButton
+                    android:id="@+id/buttonReload"
+                    style="@style/ButtonText"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="#0288D1"
+                    android:src="@drawable/ic_autorenew_white_24dp" />
+
+
             </LinearLayout>
             <ScrollView
                 android:layout_width="0dp"
@@ -216,114 +115,12 @@
                         android:textSize="30dp"
                         android:textStyle="bold" />
                 </FrameLayout>
-                <LinearLayout
-                    android:orientation="horizontal"
+                <WebView
                     android:layout_width="fill_parent"
-                    android:layout_height="20dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="Origen"
-                    android:id="@+id/textView12"
-                    android:textColor="#0000ff" />
-                    <FrameLayout
-                        android:layout_width="30dp"
-                        android:layout_height="15dp"
-                        android:id="@+id/frmStatusOrigen"
-                        android:background="#ffff1b00"
-                        android:layout_marginLeft="20dp"
-                        android:layout_gravity="center_vertical"></FrameLayout>
-                <FrameLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right">
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginLeft="60dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="14dp"
-                            android:text="Hora"
-                            android:id="@+id/textView11"
-                            android:textColor="#0000ff" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="00:00"
-                            android:id="@+id/textHoraViaje"
-                            android:layout_marginLeft="12dp"
-                            android:textSize="18dp" />
-                    </LinearLayout>
-                </FrameLayout>
-                </LinearLayout>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="xxxx"
-                    android:id="@+id/textOrigen" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="Destino"
-                    android:id="@+id/textView13"
-                    android:textColor="#0000ff" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="xxxx"
-                    android:id="@+id/textDestino" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="Pasajero"
-                    android:id="@+id/textView14"
-                    android:textColor="#0000ff" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="xxxx"
-                    android:id="@+id/textPasajero" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="Empresa"
-                    android:id="@+id/textView15"
-                    android:textColor="#0000ff" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="xxxx"
-                    android:id="@+id/textEmpresa" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Observaciones"
-                    android:id="@+id/textView16"
-                    android:textColor="#0000ff"
-                    android:textSize="14dp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="xxxx"
-                    android:id="@+id/textObs" />
-
-
-
+                    android:layout_height="fill_parent"
+                    android:id="@+id/webViewMain"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true" />
 
             </LinearLayout>
             </ScrollView>
@@ -331,40 +128,7 @@
 
 
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_gravity="center_horizontal"
-            android:background="#d5d9ea">
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                style="@style/ButtonText"
-                android:text="INICIO"
-                android:id="@+id/buttonInicio"
-                android:layout_weight="1"
-                android:background="#4863a0" />
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                style="@style/ButtonText"
-                android:text="FIN VIAJE"
-                android:id="@+id/buttonCobrar"
-                android:layout_weight="1"
-                android:background="#4863a0" />
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                style="@style/ButtonText"
-                android:text="MAPA"
-                android:id="@+id/buttonMapa"
-                android:layout_weight="1"
-                android:background="#4863a0" />
-        </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -389,7 +153,7 @@
                 android:text="NOVEDADES"
                 android:id="@+id/buttonNov"
                 android:layout_weight="1"
-                android:background="#4863a0" />
+                android:background="#0288D1" />
         </LinearLayout>
     </LinearLayout>
 

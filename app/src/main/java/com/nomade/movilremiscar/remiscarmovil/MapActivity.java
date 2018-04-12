@@ -1,36 +1,35 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.Toast;
 
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
+import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
@@ -40,15 +39,13 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
     Double latmovil, lonmovil, latOrigen, lonOrigen;
     GoogleMap googleMap;
     ArrayList<Location> listLocs;
-    Marker Mtrack;
+    Marker movilMarker, originMarker;
     String latlonOrigen, imei, movil, status, direccion;
     String strMovil;
     Handler mHandler;
-    int flg_run = 0; // flag repeating task running
-    private final static int INTERVAL = 20 * 1000; // segundos
-    private static String url_actual = "http://carlitosbahia.dynns.com/legajos/viajes/Mactual3.php";
     String tag_remis = "remiscar map ";
-
+    GooglePlayServicesHelper locationHelper;
+    SharedPrefsUtil prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,9 +65,14 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
 
         listLocs = new ArrayList<Location>();
 
-        SharedPrefsUtil prefs = SharedPrefsUtil.getInstance(this);
+        prefs = SharedPrefsUtil.getInstance(this);
         latmovil = (double) prefs.getFloat("latmovil", 0);
         lonmovil = (double) prefs.getFloat("lonmovil", 0);
+        /*if (latmovil == 0) {
+            Location newLocation = locationHelper.getLastLocation();
+            latmovil = newLocation.getLatitude();
+            lonmovil = newLocation.getLongitude();
+        }*/
         latlonOrigen = prefs.getString("latlonOrigen", "");
         imei = prefs.getString("imei", "");
         movil = prefs.getString("movil", "");
@@ -83,22 +85,22 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        locationHelper = new GooglePlayServicesHelper(MapActivity.this, true);
 
 
-        if (!latlonOrigen.equals("")) {
-            Log.d(tag_remis, "marcador****LATLON  NOvacio");
-            String[] separated = latlonOrigen.split(",");
-            latOrigen = Double.parseDouble(separated[0]);
-            lonOrigen = Double.parseDouble(separated[1]);
-            final LatLng Origen = new LatLng(latOrigen, lonOrigen);
-            Marker Ori = googleMap.addMarker(new MarkerOptions()
-                    .position(Origen)
-                    .title("Origen")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-            midPoint(latmovil, lonmovil, latOrigen, lonOrigen);
+    }
+
+    @Subscribe
+    public void processUbicacionViaje(CoordenadasViajeEvent result) {
+        if (result != null) {
+            JsonObject data = result.getObject();
+            String coordenadas = data.get("Coordenadas").getAsString();
+            Log.d("REMISCAR - ", "****CoordenadasViajeEvent Coordenadas - " + coordenadas);
+            String cubierto = data.get("Cubierto").getAsString();
+            Log.d("REMISCAR - ", "****CoordenadasViajeEvent Cubierto - " + cubierto);
+            prefs.saveString("latlonOrigen", coordenadas);
+            addOrigenMarker(coordenadas);
         }
-
-        startRepeatingTask();
     }
 
     @Override
@@ -124,48 +126,55 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
-
-        /******** Called when User off Gps *********/
-        Toast.makeText(getBaseContext(), "Gps turned off ", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-        /******** Called when User on Gps  *********/
-        Toast.makeText(getBaseContext(), "Gps turned on ", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-
-    @Override
     public void onLocationChanged(Location location) {
 
         Log.d(tag_remis, " - set location");
-        if (Mtrack != null) {
-            Mtrack.remove();
-        }
-
         strMovil = location.getLatitude() + "," + location.getLongitude();
         latmovil = (Double) location.getLatitude();
         lonmovil = (Double) location.getLongitude();
-        if (!latlonOrigen.equals("")) {
-            midPoint(latmovil, lonmovil, latOrigen, lonOrigen);
-        } else {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
+
+        if (movilMarker != null) {
+            movilMarker.remove();
         }
-
-
-        Mtrack = googleMap.addMarker(new MarkerOptions().position(new LatLng(latmovil, lonmovil)).title("Movil"));
+        final LatLng Inicio = new LatLng(latmovil, lonmovil);
+        movilMarker = googleMap.addMarker(new MarkerOptions().alpha(0.5f).position(Inicio).title("Movil"));
+        addOrigenMarker(latlonOrigen);
 
         //path en mapa
         listLocs.add(location);
         drawPrimaryLinePath(listLocs);
+
+        if (latlonOrigen.equals("")) {
+            ServiceUtils.asCoordenadas(MapActivity.this);
+        }
+    }
+
+    private void addOrigenMarker(String origen) {
+        if (originMarker != null) {
+            originMarker.remove();
+        }
+
+        if (!origen.equals("")) {
+            //midPoint(latmovil, lonmovil, latOrigen, lonOrigen);
+            String[] separated = origen.split(",");
+            latOrigen = Double.parseDouble(separated[0]);
+            lonOrigen = Double.parseDouble(separated[1]);
+
+            originMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latOrigen, lonOrigen)).title("Origen"));
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+            builder.include(originMarker.getPosition());
+            builder.include(movilMarker.getPosition());
+
+            LatLngBounds bounds = builder.build();
+
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 80);
+            googleMap.animateCamera(cu);
+        } else {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
+        }
+
+        //movilMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latmovil, lonmovil)).title("Movil"));
     }
 
     //Location fin
@@ -214,77 +223,22 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
     }
 
     @Override
-    protected void onPause() {
-        // TODO Auto-generated method stub
+    protected void onResume() {
+        super.onResume();
+        locationHelper.onResume(MapActivity.this);
+        EventBus.getDefault().register(this);
 
-        super.onPause();
-        stopRepeatingTask();
-        finish();
-    }
-
-    @Override
-    protected void onDestroy() {
-        // TODO Auto-generated method stub
-
-        super.onDestroy();
-        stopRepeatingTask();
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-
-        super.onBackPressed();
-        stopRepeatingTask();
-
-    }
-
-    Runnable mHandlerTask = new Runnable() {
-        @Override
-        public void run() {
-
-            asMActual();
-
-            mHandler.postDelayed(mHandlerTask, INTERVAL);
+        if (latlonOrigen.equals("")) {
+            ServiceUtils.asCoordenadas(MapActivity.this);
         }
-    };
-
-    void startRepeatingTask() {
-        if (flg_run == 0) mHandlerTask.run();
-        flg_run = 1;
     }
 
-    void stopRepeatingTask() {
-        mHandler.removeCallbacks(mHandlerTask);
-        flg_run = 0;
-    }
-
-    /**
-     * Background Async Task obtener datos de Mactual
-     */
-    private void asMActual() {
-
-        String url_params = url_actual + "?status=" + status + "&Movil=" + movil + "&IMEI=" + imei + "&Ubicacion=" + direccion + "&geopos=" + strMovil;
-        Ion.with(MapActivity.this)
-                .load(url_params)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-
-                        processMActual(result);
-
-                    }
-
-                });
-    }
-
-
-    private void processMActual(JsonObject data) {
-        // check log cat from response
-        Log.d("Remiscar Res- ", data.toString());
-
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationHelper.onPause();
+        EventBus.getDefault().unregister(this);
+        finish();
     }
 
     @Override
@@ -294,7 +248,15 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
         googleMap.getUiSettings().setZoomGesturesEnabled(true);
         //-34.935506,-57.9556878
         final LatLng Inicio = new LatLng(latmovil, lonmovil);
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
-        Marker TP = googleMap.addMarker(new MarkerOptions().position(Inicio).title("Movil"));
+        //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
+        movilMarker = googleMap.addMarker(new MarkerOptions().alpha(0.5f).position(Inicio).title("Movil"));
+
+        //TEST///
+        //latlonOrigen="-34.935506,-57.9556878";
+        if (!latlonOrigen.equals("")) {
+            Log.d(tag_remis, "marcador****LATLON  NOvacio");
+            String[] separated = latlonOrigen.split(",");
+            addOrigenMarker(latlonOrigen);
+        }
     }
 }

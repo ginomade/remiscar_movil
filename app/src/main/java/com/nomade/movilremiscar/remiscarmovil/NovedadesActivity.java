@@ -12,28 +12,33 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 // pantalla de datos de novedades para el movil
 public class NovedadesActivity extends Activity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mnovedades.php";
-    private static final String URL_venc = "http://carlitosbahia.dynns.com/legajos/viajes/Mvencimientos.php";
-    private static final String URL_calles = "http://carlitosbahia.dynns.com/legajos/viajes/buscar.php";
-    private static final String URL_empresas = "http://carlitosbahia.dynns.com/legajos/viajes/Mempresas.php";
-    private static final String URL_Cambio = "http://carlitosbahia.dynns.com/legajos/viajes/Mcambio.php";
+    private static final String URL = ServiceUtils.base_url + "Mnovedades.php";
+    private static final String URL_venc = ServiceUtils.base_url + "Mvencimientos.php";
+    private static final String URL_calles = ServiceUtils.base_url + "buscar.php";
+    private static final String URL_empresas = ServiceUtils.base_url + "Mempresas.php";
 
     Button buttonInicio, buttonVenc, buttonCalles, buttonEmpresas, buttonCamUsu;
 
     String params;
+
+    SharedPrefsUtil sharedPrefs;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_novedades);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        String imei = settings.getString("imei", "");
-        String movil = settings.getString("movil", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(NovedadesActivity.this);
+        String imei = sharedPrefs.getString("imei", "");
+        String movil = sharedPrefs.getString("movil", "");
 
         params = "?IMEI=" + imei + "&Movil=" + movil;
 
@@ -43,10 +48,7 @@ public class NovedadesActivity extends Activity {
         webSettings.setJavaScriptEnabled(true); // Enable Javascript.
         mWebView.setWebViewClient(yourWebClient);
 
-        webSettings.setAllowFileAccessFromFileURLs(true);  // Enable HTML Imports to access file://.
-        //webSettings.setAllowUniversalAccessFromFileURLs(true);
-
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setAllowFileAccessFromFileURLs(true);
 
         mWebView.loadUrl(URL + params);
 

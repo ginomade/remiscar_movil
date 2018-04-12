@@ -12,33 +12,33 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 //pantalla de datos de viajes
 public class CopiadoActivity extends AppCompatActivity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mcopiado.php";
+    private static final String URL = ServiceUtils.base_url + "Mcopiado.php";
 
     Button buttonInicio;
-    String TAG_SUCCESS = "result";
 
-    JSONParser jsonParser = new JSONParser();
-
-    String movil, resp;
+    String movil;
     String Traslados;
+
+    SharedPrefsUtil sharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_copiado);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        movil = settings.getString("movil", "");
-        Traslados = settings.getString("Traslados", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(CopiadoActivity.this);
+        movil = sharedPrefs.getString("movil", "");
+        Traslados = sharedPrefs.getString("Traslados", "");
         mWebView = (WebView) findViewById(R.id.webView5);
 
         mWebView.setWebChromeClient(new WebChromeClient());
-
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         mWebView.setWebViewClient(yourWebClient);
 

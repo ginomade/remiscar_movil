@@ -1,15 +1,13 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -17,24 +15,25 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.gson.JsonObject;
 import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
 import com.nomade.movilremiscar.remiscarmovil.Util.PollingManager;
@@ -42,9 +41,9 @@ import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 import com.nomade.movilremiscar.remiscarmovil.events.AlertEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.AutoEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
-import com.nomade.movilremiscar.remiscarmovil.events.MActualEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
@@ -76,21 +75,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     int flg_origen = 0; // flag repeating task running
     public int pa = 0;// flag para boton de panico
     int flg_mens = 0; // flag para mensajes
-    Double lat, lon;
+    int flg_mens_auto = 0;
+    Double lat = 0.0;
+    Double lon = 0.0;
 
-    Button buttonMap, buttonNov, buttonViajes, buttonCobrar, buttonPanico, buttonInicio;
-    LinearLayout layZonas;
+    Button buttonMap, buttonNov, buttonPanico;
+    ImageButton reloadButton;
 
     String carlitos, carlibres, bahia, bahialibres, status, movil, geopos;
-    String HCubierto, Origen, Pasajero, ObtDestino, Traslados, CantViajes,
-            ZonaDestino, ObtAgencia, Observaciones, ObtCoordenadas;
+    String Origen, ZonaDestino, ObtCoordenadas;
     String al_status, al_geopos, al_movil, al_fecha, al_ubicacion;
 
-    TextView textCarlitos, textLibres, textBahia, textLibresB, textOrigen, textDestino, textPasajero,
-            textHoraViaje, textEmpresa, textObs, textStatus, textNroMovil;
+    TextView textNroMovil;
 
 
     File outfile = null;
+
+    WebView mWebView;
 
     /////////////TEST/////////////
     // setear a true para generar el log en memoria sd del equipo.
@@ -101,8 +102,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private GooglePlayServicesHelper locationHelper;
 
-    String[] mPermission = {Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA,
+    String[] mPermission = {Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private static final int MY_PERMISSIONS_REQUEST = 1;
@@ -130,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         locationHelper = new GooglePlayServicesHelper(this, true);
 
+
         ////////////TEST////////////////////////////
         ////log en sdcard
         // setear el IF a true para generar el log
@@ -153,35 +155,93 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ////log en sdcard
         ////////////TEST////////////////////////////
 
+        initializeUI();
         inicializarDatos();
         checkConnection();
-
+        checkLocationService();
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
         ServiceUtils.asValidarUsuario(mContext);
 
-        initializeUI();
+
+        iniciarServicios();
 
     }
 
+
+    private void iniciarServicios() {
+        setMainView();
+        ServiceUtils.asAuto(mContext);
+        ServiceUtils.asMensaje(mContext);
+        ServiceUtils.asCoordenadas(mContext);
+    }
+
+    private void setMainView() {
+
+        String finalUrl = ServiceUtils.url_main + "?imei=" + imei
+                + "&Movil=" + movil
+                + "&geopos=" + geopos;
+        mWebView = (WebView) findViewById(R.id.webViewMain);
+
+        mWebView.setWebViewClient(mainWebClient);
+        mWebView.loadUrl(finalUrl);
+
+    }
+
+    WebViewClient mainWebClient = new WebViewClient() {
+        // you tell the webclient you want to catch when a url is about to load
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.setScrollY(0);
+            mWebView.loadUrl(url);
+
+            return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            final WebView newView = view;
+
+
+            newView.postDelayed(new Runnable() {
+                public void run() {
+                    if (newView.getProgress() == 100) {
+                        newView.postDelayed(new Runnable() {
+                            public void run() {
+                                newView.scrollTo(0, 0);
+                                //pageloaded = true;
+                            }
+                        }, 10);
+                    } else {
+                        newView.post(this);
+                    }
+                }
+            }, 100);
+
+
+        }
+
+
+        // here you execute an action when the URL you want is about to load
+        @Override
+        public void onLoadResource(WebView view, String url) {
+
+        }
+
+
+    };
+
     private void initializeUI() {
         frmStatusLoc = (FrameLayout) findViewById(R.id.frmStatusLoc);
-        frmStatusOrigen = (FrameLayout) findViewById(R.id.frmStatusOrigen);
-        buttonInicio = (Button) findViewById(R.id.buttonInicio);
-        buttonInicio.setOnClickListener(new View.OnClickListener() {
 
+        reloadButton = (ImageButton) findViewById(R.id.buttonReload);
+        reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View arg0) {
-
-                if (st_flag == 0) {
-                    callDialogDestinoInicio();
-
-                }
-
+            public void onClick(View v) {
+                setMainView();
             }
-
         });
 
         buttonMap = (Button) findViewById(R.id.buttonMapa);
@@ -210,35 +270,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         });
 
-        buttonViajes = (Button) findViewById(R.id.buttonViajes);
-        buttonViajes.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-
-                Intent intent = new Intent(MainActivity.this, ViajesActivity.class);
-                startActivity(intent);
-
-            }
-
-        });
-
-
-        buttonCobrar = (Button) findViewById(R.id.buttonCobrar);
-        buttonCobrar.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-
-                if (st_flag == 1) {
-                    callDialogDestinoFin();
-
-                }
-
-            }
-
-        });
-
         //boton de panico
         buttonPanico = (Button) findViewById(R.id.buttonPanico);
         buttonPanico.setOnClickListener(new View.OnClickListener() {
@@ -254,50 +285,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         });
 
-        layZonas = (LinearLayout) findViewById(R.id.layZonas);
-        layZonas.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-
-                Intent intent = new Intent(MainActivity.this, ZonasActivity.class);
-                startActivity(intent);
-
-            }
-
-        });
-
         //datos en pantalla desde Mactual
-        textCarlitos = (TextView) findViewById(R.id.textCarlitos);
-        textLibres = (TextView) findViewById(R.id.textLibres);
-        textBahia = (TextView) findViewById(R.id.textBahia);
-        textLibresB = (TextView) findViewById(R.id.textLibresB);
-        textOrigen = (TextView) findViewById(R.id.textOrigen);
-        textDestino = (TextView) findViewById(R.id.textDestino);
-        textPasajero = (TextView) findViewById(R.id.textPasajero);
-        textEmpresa = (TextView) findViewById(R.id.textEmpresa);
-        textObs = (TextView) findViewById(R.id.textObs);
-        textHoraViaje = (TextView) findViewById(R.id.textHoraViaje);
-        textStatus = (TextView) findViewById(R.id.textStatus);
         textNroMovil = (TextView) findViewById(R.id.textNroMovil);
-        textStatus.addTextChangedListener(new TextWatcher() {
-            public void afterTextChanged(Editable s) {
-                // you can call or do what you want with your EditText here
-                if (textStatus.getText() == "LIBRE") {
-                    textStatus.setTextColor(Color.parseColor("#00ff00"));
-                } else {
-                    textStatus.setTextColor(Color.parseColor("#ff0000"));
-                }
-
-            }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-        });
-
 
         frmAlerta = (FrameLayout) findViewById(R.id.frmAlerta);
         frmAlerta.setVisibility(View.GONE);
@@ -306,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             @Override
             public void onClick(View arg0) {
-
+                getSingleLocation();
                 Intent intent = new Intent(MainActivity.this, AlertaActivity.class);
                 startActivity(intent);
 
@@ -322,10 +311,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     ActivityCompat.checkSelfPermission(this, mPermission[1])
                             != PackageManager.PERMISSION_GRANTED ||
                     ActivityCompat.checkSelfPermission(this, mPermission[2])
-                            != PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(this, mPermission[3])
-                            != PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(this, mPermission[4])
                             != PackageManager.PERMISSION_GRANTED) {
 
                 ActivityCompat.requestPermissions(this,
@@ -343,8 +328,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                 && grantResults[1] == PackageManager.PERMISSION_GRANTED
-                && grantResults[2] == PackageManager.PERMISSION_GRANTED
-                && grantResults[3] == PackageManager.PERMISSION_GRANTED) {
+                && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
 
             // permission was granted.
 
@@ -352,82 +336,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         } else {
 
             // permission denied.
-            //Toast.makeText(getBaseContext(), "Permissions need to be granted.", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "Faltan permisos necesarios para funcionar.", Toast.LENGTH_LONG).show();
+            finish();
         }
 
     }
-
-
-    public void callDialogDestinoFin() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        alertDialog.setTitle("Fin Viaje");
-        alertDialog.setMessage("Ingrese zona donde finalizo:");
-
-        final EditText input = new EditText(MainActivity.this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        input.setLayoutParams(lp);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        alertDialog.setView(input);
-
-
-        alertDialog.setPositiveButton("OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        ZonaDestino = input.getText().toString();
-
-                        buttonInicio.setBackgroundColor(Color.parseColor("#FF08FF02"));
-                        buttonCobrar.setBackgroundColor(Color.parseColor("#848FBF"));
-                        ServiceUtils.asInicioFin("fin", mContext,
-                                Origen, Traslados, ZonaDestino, Direccion, geopos);
-                        Toast.makeText(getBaseContext(), "Viaje Finalizado.", Toast.LENGTH_LONG).show();
-                        final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
-                        mp.start();
-                        st_flag = 0;
-                        flg_origen = 0;
-                    }
-                });
-
-
-        alertDialog.show();
-    }
-
-    public void callDialogDestinoInicio() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        alertDialog.setTitle("Destino");
-        alertDialog.setMessage("Ingrese zona final:");
-
-        final EditText input = new EditText(MainActivity.this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        input.setLayoutParams(lp);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        alertDialog.setView(input);
-
-
-        alertDialog.setPositiveButton("OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        ZonaDestino = input.getText().toString();
-
-                        buttonInicio.setBackgroundColor(Color.parseColor("#848FBF"));
-                        buttonCobrar.setBackgroundColor(Color.parseColor("#FF08FF02"));
-                        ServiceUtils.asInicioFin("inicio", mContext,
-                                Origen, Traslados, ZonaDestino, Direccion, geopos);
-                        Toast.makeText(getBaseContext(), "Viaje Iniciado.", Toast.LENGTH_LONG).show();
-                        final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
-                        mp.start();
-                        st_flag = 1;
-
-                    }
-                });
-
-
-        alertDialog.show();
-    }
-
 
     public void logToSdcard(String tag, String statement) {
         // generacion de log en memoria sd del equipo
@@ -455,14 +368,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             try {
 
 
-                FileOutputStream fOut = new FileOutputStream(outfile, true);
-                OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-                myOutWriter.append(currentDateandTime + " " + tag + "     ");
-                myOutWriter.append(statement);
-                myOutWriter.append("\n");
-                myOutWriter.flush();
-                myOutWriter.close();
-                fOut.close();
+                try (FileOutputStream fOut = new FileOutputStream(outfile, true)) {
+                    OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                    myOutWriter.append(currentDateandTime + " " + tag + "     ");
+                    myOutWriter.append(statement);
+                    myOutWriter.append("\n");
+                    myOutWriter.flush();
+                    myOutWriter.close();
+                    fOut.close();
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -482,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ObtCoordenadas = "";
         Origen = "";
         ZonaDestino = "";
+        movil = "";
         imei = getPhoneImei();
         //imei = "359015062458232";//TEST/////
         SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
@@ -535,14 +450,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onPause() {
         super.onPause();
         pollingManager.stopRepeatingTask();
+        locationHelper.onPause();
         EventBus.getDefault().unregister(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        pollingManager.startRepeatingTask();
         EventBus.getDefault().register(this);
+        locationHelper.onResume(MainActivity.this);
+        pollingManager.startRepeatingTask();
+
+    }
+
+    private void getSingleLocation() {
+        if (sharedPrefs != null) {
+            Location singleLocation = locationHelper.getLastLocation();
+            sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
+            sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
+        }
     }
 
     @Override
@@ -579,25 +505,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return mTelephonyManager.getDeviceId();
     }
 
-    //Location inicio
-    @Override
-    public void onProviderDisabled(String provider) {
-
-        /******** Called when User off Gps *********/
-        Toast.makeText(getBaseContext(), "Gps turned off ", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-        /******** Called when User on Gps  *********/
-        Toast.makeText(getBaseContext(), "Gps turned on ", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -631,14 +538,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             e.printStackTrace();
             if (t == "1")
-                Toast.makeText(getApplicationContext(), "Could not get address..!", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "Could not get address..!", Toast.LENGTH_LONG).show();
         }
     }
 
     // getting location.
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processUbicacion(UbicacionEvent data) {
+    @Subscribe()
+    public void processUbicacion(UbicacionEvent data) {
 
         try {
             JsonObject result = data.getObject();
@@ -716,7 +623,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processLocation(LocationEvent result) {
+    public void processUbicacionViaje(CoordenadasViajeEvent result) {
+        if (result != null) {
+            JsonObject data = result.getObject();
+            String coordenadas = data.get("Coordenadas").getAsString();
+            Log.d("REMISCAR - ", "****CoordenadasViajeEvent Coordenadas - " + coordenadas);
+            String cubierto = data.get("Cubierto").getAsString();
+            Log.d("REMISCAR - ", "****CoordenadasViajeEvent Cubierto - " + cubierto);
+            sharedPrefs.saveString("latlonOrigen", coordenadas);
+        }
+    }
+
+    @Subscribe()
+    public void processLocation(LocationEvent result) {
         String data = result.getObject();
         Log.d("REMISCAR - ", " ADDRESS- POST LOCATION");
         logToSdcard("REMISCAR - ", " ADDRESS- POST LOCATION");
@@ -780,8 +699,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     //Location fin
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processValidacion(ValidacionEvent result) {
+    @Subscribe()
+    public void processValidacion(ValidacionEvent result) {
         if (result != null) {
             JsonObject data = result.getObject();
             // check log cat from response
@@ -805,21 +724,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             } else if (success == 1) {
                 //inicio valido para movil autorizado
+                Log.w("Remiscar", "VALIDACION - " + movil + " - " + imei);
                 textNroMovil.setText(movil);
                 sharedPrefs.saveString("movil", movil);
                 sharedPrefs.saveString("imei", imei);
-                ServiceUtils.asMActual(mContext, status,
-                        Direccion, geopos);
 
                 pollingManager.startRepeatingTask();
 
 
             } else if (success == 0) {
-                Toast.makeText(getApplicationContext(), "App solo para propietarios autorizados.", Toast.LENGTH_SHORT)
+                Toast.makeText(mContext, "App solo para propietarios autorizados.", Toast.LENGTH_SHORT)
                         .show();
                 finish();
             } else {
-                Toast.makeText(getApplicationContext(), "No se pudo conectar. Intente de nuevo.", Toast.LENGTH_SHORT)
+                Toast.makeText(mContext, "No se pudo conectar. Intente de nuevo.", Toast.LENGTH_SHORT)
                         .show();
                 finish();
             }
@@ -827,131 +745,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processMActual(MActualEvent event) {
-
-        try {
-            JsonObject data = event.getObject();
-            Log.d("Remiscar MAc Res- ", data.toString());
-            logToSdcard("Remiscar MAc Res- ", data.toString());
-            int success = data.get(TAG_SUCCESS).getAsInt();
-            carlitos = data.get("carlitos").getAsString();
-            carlibres = data.get("carlibres").getAsString();
-            bahia = data.get("bahia").getAsString();
-            bahialibres = data.get("bahialibres").getAsString();
-            status = data.get("status").getAsString();
-            if (data.has("Origen")) {
-                Origen = data.get("Origen").getAsString();
-            }
-            if (data.has("ObtDestino")) {
-                ObtDestino = data.get("ObtDestino").getAsString();
-            }
-            if (data.has("Pasajero")) {
-                Pasajero = data.get("Pasajero").getAsString();
-            }
-            if (data.has("ObtAgencia")) {
-                ObtAgencia = data.get("ObtAgencia").getAsString();
-            }
-            if (data.has("Observaciones")) {
-                Observaciones = data.get("Observaciones").getAsString();
-            }
-            if (data.has("HCubierto")) {
-                HCubierto = data.get("HCubierto").getAsString();
-            }
-            if (data.has("Traslados")) {
-                Traslados = data.get("Traslados").getAsString();
-            }
-            if (data.has("ObtCoordenadas")) {
-                ObtCoordenadas = data.get("ObtCoordenadas").getAsString();
-            }
-
-            Log.d("REMISCAR - ", String.valueOf(success));
-            logToSdcard("REMISCAR - ", String.valueOf(success));
-
-            if (success == 0) {
-
-                String resultLoc = "";
-                textCarlitos.setText(carlitos);
-                textLibres.setText(carlibres);
-                textBahia.setText(bahia);
-                textLibresB.setText(bahialibres);
-                textStatus.setText(status);
-                frmStatusOrigen.setBackgroundColor(Color.parseColor("#fff4b2"));
-
-                sharedPrefs.saveString("latlonOrigen", resultLoc);
-                sharedPrefs.saveString("movil", movil);
-                sharedPrefs.saveString("status", status);
-                sharedPrefs.saveString("imei", imei);
-
-                if (status == "LIBRE") {
-                    buttonInicio.setBackgroundColor(Color.parseColor("#1FA9FF"));
-                    buttonCobrar.setBackgroundColor(Color.parseColor("#1FA9FF"));
-                    textStatus.setTextColor(Color.GREEN);//color de texto status
-
-                    textOrigen.setText("");
-                    textDestino.setText("");
-                    textPasajero.setText("");
-                    textEmpresa.setText("");
-                    textObs.setText("");
-                    textHoraViaje.setText("");
-                } else {
-
-                    textStatus.setTextColor(Color.RED);//color de texto status
-
-                    textOrigen.setText(Origen);
-                    textDestino.setText(ObtDestino);
-                    textPasajero.setText(Pasajero);
-                    textEmpresa.setText(ObtAgencia);
-                    textObs.setText(Observaciones);
-                    textHoraViaje.setText(HCubierto);
-                }
-
-                //si tengo coordenadas las envio, sino busco por el dato de origen.
-                if (ObtCoordenadas.equals("")) {
-                    ///////////////TEST///////////////////
-                    //Origen="1200 alem";
-                    ///////////////TEST///////////////////
-                    Log.d("REMISCAR - ", "origen -- " + Origen);
-                    logToSdcard("REMISCAR - ", "origen -- " + Origen);
-
-                    if (Origen.equals("")) {
-
-                        resultLoc = "";
-                        sharedPrefs.saveString("latlonOrigen", resultLoc);
-
-                    } else {
-                        if (flg_origen == 0) getAddressLocation();
-                        // busco si el numero de la direccion viene primero
-                        /*if(Origen.substring(0, 1).matches("[0-9]")){
-                            Log.d("REMISCAR - ","origen --NUMERO ");
-                            getAddressLocation();
-                        }else{
-                            Origen="";
-                        }*/
-
-
-                    }
-                } else {
-                    resultLoc = ObtCoordenadas;
-                    sharedPrefs.saveString("latlonOrigen", resultLoc);
-                    frmStatusOrigen.setBackgroundColor(Color.parseColor("#00ff00"));
-                    //-34.935506,-57.9556878
-                    //editor.putString("latlonOrigen","-34.935506,-57.9");
-
-                }
-
-            } else if (success == 2) {
-                Toast.makeText(getApplicationContext(), "App solo para propietarios autorizados.", Toast.LENGTH_SHORT)
-                        .show();
-                finish();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processInicioFin(InicioFinEvent result) {
+    public void processInicioFin(InicioFinEvent result) {
         try {
             if (result != null) {
                 Log.d("Remiscar-IF-Response ", result.toString());
@@ -964,7 +758,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Subscribe
-    private void processAlert(AlertEvent data) {
+    public void processAlert(AlertEvent data) {
         // check for success tag
         try {
             JsonObject result = data.getObject();
@@ -1025,8 +819,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processMensaje(MensajeEvent data) {
+    @Subscribe()
+    public void processMensaje(MensajeEvent data) {
+        //reenvio a url de Mviajeshoy.php para actualizar datos de geopos.
+        setMainView();
+
         int success;
         JsonObject result = new JsonObject();
         result = data.getObject();
@@ -1053,7 +850,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 Log.d("Remiscar -", "HAY mensajes.");
                 logToSdcard("Remiscar -", "HAY mensajes.");
                 if (flg_mens == 0) {
-                    Toast.makeText(getApplicationContext(), "Hay nuevos mensajes para usted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Hay nuevos mensajes para usted.", Toast.LENGTH_SHORT).show();
                     final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
                     mp.start();
                     buttonNov.setText("HAY MENSAJES");
@@ -1071,8 +868,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processAuto(AutoEvent data) {
+    @Subscribe()
+    public void processAuto(AutoEvent data) {
         int success;
         JsonObject result = new JsonObject();
         result = data.getObject();
@@ -1091,21 +888,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             if (success == 0) {
                 Log.d("Remiscar -", "sin mensajes.");
                 logToSdcard("Remiscar -", "sin mensajes.");
-                flg_mens = 0;
-                buttonViajes.setText("VIAJES");
-                buttonViajes.setBackgroundColor(Color.parseColor("#000000"));
-                buttonViajes.setTextColor(Color.parseColor("#FDFC80"));
+                flg_mens_auto = 0;
             } else if (success == 1) {
                 Log.d("Remiscar -", "AUTODESPACHO.");
                 logToSdcard("Remiscar -", "AUTODESPACHO.");
-                if (flg_mens == 0) {
-                    Toast.makeText(getApplicationContext(), "AUTODESPACHO.", Toast.LENGTH_SHORT).show();
+                if (flg_mens_auto == 0) {
+                    Toast.makeText(mContext, "AUTODESPACHO.", Toast.LENGTH_SHORT).show();
                     final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
                     mp.start();
-                    buttonViajes.setText("AUTODESPACHO");
-                    buttonViajes.setBackgroundColor(Color.parseColor("#FDFC80"));
-                    buttonViajes.setTextColor(Color.parseColor("#000000"));
-                    flg_mens = 1;
+                    flg_mens_auto = 1;
                 } else {
 
                 }
@@ -1118,7 +909,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    private void processPanic(PanicEvent data) {
+    public void processPanic(PanicEvent data) {
         JsonObject result = new JsonObject();
         result = data.getObject();
         Log.d("Remiscar", "envio Panic");
@@ -1144,8 +935,49 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Subscribe
-    private void onPollingStep(PollingEvent event) {
+    public void onPollingStep(PollingEvent event) {
         pa = 0;//reset boton de panico
         flg_origen = 0;
+        if (textNroMovil.getText().toString().equals("00")) {
+            textNroMovil.setText(movil.toString());
+        }
+        if (movil.equals("")) {
+            ServiceUtils.asValidarUsuario(mContext);
+        }
+
+    }
+
+    public void checkLocationService() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+        }
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+        }
+        if (!gps_enabled && !network_enabled) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage(R.string.gps_disabled);
+            dialog.setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                }
+            });
+            dialog.setNegativeButton(R.string.cancelar, new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(mContext, "La aplicación no funcionará correctamente si no activa la localización del equipo.", Toast.LENGTH_LONG).show();
+
+                }
+            });
+            dialog.show();
+        }
     }
 }

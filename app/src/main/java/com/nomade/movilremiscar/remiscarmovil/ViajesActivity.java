@@ -2,12 +2,12 @@ package com.nomade.movilremiscar.remiscarmovil;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -21,23 +21,24 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 //pantalla de datos de viajes
 public class ViajesActivity extends AppCompatActivity implements LocationListener {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mviajeshoy.php";
-    private static final String URL_cobro = "http://carlitosbahia.dynns.com/legajos/viajes/Mcobro.php";
+    private static final String URL = ServiceUtils.base_url + "Mviajeshoy.php";
+    private static final String URL_cobro = ServiceUtils.base_url + "Mcobro.php";
     Button buttonInicio;
     Button Crono;
-    String TAG_SUCCESS = "result";
 
-    JSONParser jsonParser = new JSONParser();
-
-    String movil, resp, imei, geopos;
+    String movil, imei, geopos;
 
     Double lat, lon;
 
     private LocationManager locationManager;
+    SharedPrefsUtil sharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +46,14 @@ public class ViajesActivity extends AppCompatActivity implements LocationListene
         setContentView(R.layout.activity_viajes);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        movil = settings.getString("movil", "");
-        imei = settings.getString("imei", "");
-        geopos = settings.getString("geopos", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(ViajesActivity.this);
+        movil = sharedPrefs.getString("movil", "");
+        imei = sharedPrefs.getString("imei", "");
+        geopos = sharedPrefs.getString("geopos", "");
 
         mWebView = (WebView) findViewById(R.id.webView);
 
         mWebView.setWebChromeClient(new WebChromeClient());
-
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         mWebView.setWebViewClient(yourWebClient);
 
@@ -128,6 +127,17 @@ public class ViajesActivity extends AppCompatActivity implements LocationListene
     private void locationInicio() {
         PackageManager pm = ViajesActivity.this.getPackageManager();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1500, 10, this);
         if (pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {

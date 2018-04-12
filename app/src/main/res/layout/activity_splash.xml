@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.nomade.pixivus.SplashActivity" >
+    tools:context="com.nomade.movilremiscar.remiscarmovil.SplashActivity" >
 
     <ImageView
         android:id="@+id/imgLogo"
@@ -18,9 +18,10 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="40dp"
+        android:textSize="30dp"
         android:text="PROHIBIDO USAR AL CONDUCIR"
         android:id="@+id/textView20"
+        android:textAlignment="center"
         android:textColor="#ffffff"
         android:background="#ff0000"
         android:layout_centerHorizontal="true"
@@ -28,7 +29,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="40dp"
+        android:textSize="20dp"
         android:text="VERSION 1.8"
         android:id="@+id/textView17"
         android:textColor="#5168ED"

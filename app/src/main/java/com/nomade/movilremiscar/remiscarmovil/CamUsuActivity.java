@@ -1,8 +1,6 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,30 +10,32 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 // pantalla de datos de novedades para el movil
 public class CamUsuActivity extends Activity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mnovedades.php";
-    private static final String URL_venc = "http://carlitosbahia.dynns.com/legajos/viajes/Mvencimientos.php";
-    private static final String URL_calles = "http://carlitosbahia.dynns.com/legajos/viajes/buscar.php";
-    private static final String URL_CamUsu = "http://carlitosbahia.dynns.com/legajos/viajes/Mcamusu.php";
-    private static final String URL_Cambio = "http://carlitosbahia.dynns.com/legajos/viajes/Mcambio.php";
+    private static final String URL_CamUsu = ServiceUtils.base_url + "Mcamusu.php";
+    private static final String URL_Cambio = ServiceUtils.base_url + "Mcambio.php";
 
-    Button buttonInicio, buttonCamUsu ;
+    Button buttonInicio, buttonCamUsu;
 
     String params;
+    SharedPrefsUtil sharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camusu);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        String imei = settings.getString("imei", "");
-        String movil = settings.getString("movil", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(CamUsuActivity.this);
 
-        params = "?IMEI="+imei+"&Movil="+movil;
+        String imei = sharedPrefs.getString("imei", "");
+        String movil = sharedPrefs.getString("movil", "");
+
+        params = "?IMEI=" + imei + "&Movil=" + movil;
 
         mWebView = (WebView) findViewById(R.id.webView);
 
@@ -43,10 +43,7 @@ public class CamUsuActivity extends Activity {
         webSettings.setJavaScriptEnabled(true); // Enable Javascript.
         mWebView.setWebViewClient(yourWebClient);
 
-        webSettings.setAllowFileAccessFromFileURLs(true);  // Enable HTML Imports to access file://.
-        //webSettings.setAllowUniversalAccessFromFileURLs(true);
-
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setAllowFileAccessFromFileURLs(true);
 
         mWebView.loadUrl(URL_Cambio + params);
 
@@ -77,24 +74,24 @@ public class CamUsuActivity extends Activity {
 
     }
 
-    WebViewClient yourWebClient = new WebViewClient(){
+    WebViewClient yourWebClient = new WebViewClient() {
         // you tell the webclient you want to catch when a url is about to load
         @Override
-        public boolean shouldOverrideUrlLoading(WebView  view, String  url){
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
             //mWebView.loadUrl(url);
             return true;
         }
+
         // here you execute an action when the URL you want is about to load
         @Override
-        public void onLoadResource(WebView  view, String  url){
+        public void onLoadResource(WebView view, String url) {
 
         }
     };
 
-    public void hideBtns(){
+    public void hideBtns() {
         buttonCamUsu.setVisibility(View.GONE);
     }
-
 
 
     @Override

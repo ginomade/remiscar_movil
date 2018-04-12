@@ -24,6 +24,7 @@ public class PollingManager {
     private final static int INTERVAL = 20 * 1000; // segundos
     Handler mHandler;
     SharedPrefsUtil prefs;
+    int mProcessDelay = 0;
 
     public PollingManager(Context context) {
         mContext = context;
@@ -35,12 +36,14 @@ public class PollingManager {
         @Override
         public void run() {
 
-            ServiceUtils.asMActual(mContext, prefs.getString("status", ""),
-                    prefs.getString("Direccion", ""), prefs.getString("geopos", ""));
-            ServiceUtils.asAuto(mContext);
+
+
             if(Utils.esMultiplo(clearCacheCounter, 5)){
+                // con n=5 y INTERVAL = 20 segundos ejecuta cada 1 minuto
+                ServiceUtils.asAuto(mContext);
                 ServiceUtils.asMensaje(mContext);
                 ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""), prefs.getString("geopos", ""));
+                ServiceUtils.asCoordenadas(mContext);
             }
 
             clearCacheCounter++; // 180 == 1 hora
@@ -49,6 +52,14 @@ public class PollingManager {
                 clearCacheCounter = 0;
                 Log.w("Remiscar*", "***** CLEAR CACHE *****");
             }
+
+            if(mProcessDelay >= 25){
+                // 25 corresponde a 5 minutos con Interval=20 segundos.
+                mProcessDelay = 0;
+                //ServiceUtils.asCoordenadas(mContext);
+                ServiceUtils.asMensaje(mContext);
+            }
+            mProcessDelay++;
 
             EventBus.getDefault().post(new PollingEvent());
 

@@ -1,7 +1,6 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -14,35 +13,34 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
+import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
+
 //pantalla de datos de viajes
 public class ZonasActivity extends AppCompatActivity {
 
     WebView mWebView;
-    private static final String URL = "http://carlitosbahia.dynns.com/legajos/viajes/Mzonas.php";
-    private static final String URL_CA = "http://carlitosbahia.dynns.com/legajos/viajes/MzonasCA.php";
+    private static final String URL = ServiceUtils.base_url + "Mzonas.php";
+    private static final String URL_CA = ServiceUtils.base_url + "MzonasCA.php";
     Button buttonInicio;
     Button Crono;
-    String TAG_SUCCESS = "result";
 
-    JSONParser jsonParser = new JSONParser();
-
-    String movil, resp, imei, geopos;
+    String movil, imei, geopos;
+    SharedPrefsUtil sharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viajes);
 
-        SharedPreferences settings = getSharedPreferences("RemisData", 0);
-        movil = settings.getString("movil", "");
-        imei = settings.getString("imei", "");
-        geopos = settings.getString("geopos", "");
+        sharedPrefs = SharedPrefsUtil.getInstance(ZonasActivity.this);
+        movil = sharedPrefs.getString("movil", "");
+        imei = sharedPrefs.getString("imei", "");
+        geopos = sharedPrefs.getString("geopos", "");
 
         mWebView = (WebView) findViewById(R.id.webView);
 
         mWebView.setWebChromeClient(new WebChromeClient());
-
-        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         mWebView.setWebViewClient(yourWebClient);
 
