@@ -74,11 +74,13 @@ public class PanicActivity extends Activity implements LocationListener {
             @Override
             public void onClick(View arg0) {
                 if ("".equals(geopos)) {
-                    getSingleLocation();
+                    Toast.makeText(PanicActivity.this, "Localizacion no detectada. Vuelva a intentar.", Toast.LENGTH_LONG).show();
+                }else{
+
+                    Toast.makeText(PanicActivity.this, "PRUEBA de alerta enviada.", Toast.LENGTH_LONG).show();
+                    prueba.setBackgroundColor(Color.parseColor("#326166"));
+                    processAlert("PRUEBA");
                 }
-                Toast.makeText(PanicActivity.this, "PRUEBA de alerta enviada.", Toast.LENGTH_LONG).show();
-                prueba.setBackgroundColor(Color.parseColor("#326166"));
-                processAlert("PRUEBA");
 
             }
         });
@@ -88,10 +90,12 @@ public class PanicActivity extends Activity implements LocationListener {
             @Override
             public void onClick(View arg0) {
                 if ("".equals(geopos)) {
-                    getSingleLocation();
+                    Toast.makeText(PanicActivity.this, "Localizacion no detectada. Vuelva a intentar.", Toast.LENGTH_LONG).show();
+                }else{
+
+                    Log.d("Remiscar*", "-LOCATION-" + latmovil + " - " + lonmovil);
+                    processAlert("ALERTA");
                 }
-                Log.d("Remiscar*", "-LOCATION-" + latmovil + " - " + lonmovil);
-                processAlert("ALERTA");
 
             }
 

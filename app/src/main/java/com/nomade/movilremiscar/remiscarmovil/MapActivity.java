@@ -11,12 +11,14 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -37,7 +39,7 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
     Double latmovil, lonmovil, latOrigen, lonOrigen;
     GoogleMap googleMap;
     ArrayList<Location> listLocs;
-    Marker Mtrack;
+    Marker movilMarker, originMarker;
     String latlonOrigen, imei, movil, status, direccion;
     String strMovil;
     Handler mHandler;
@@ -85,9 +87,6 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
 
         locationHelper = new GooglePlayServicesHelper(MapActivity.this, true);
 
-        if(latlonOrigen.equals("")){
-            ServiceUtils.asCoordenadas(MapActivity.this);
-        }
 
     }
 
@@ -134,25 +133,48 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
         latmovil = (Double) location.getLatitude();
         lonmovil = (Double) location.getLongitude();
 
+        if (movilMarker != null) {
+            movilMarker.remove();
+        }
+        final LatLng Inicio = new LatLng(latmovil, lonmovil);
+        movilMarker = googleMap.addMarker(new MarkerOptions().alpha(0.5f).position(Inicio).title("Movil"));
         addOrigenMarker(latlonOrigen);
 
         //path en mapa
         listLocs.add(location);
         drawPrimaryLinePath(listLocs);
+
+        if (latlonOrigen.equals("")) {
+            ServiceUtils.asCoordenadas(MapActivity.this);
+        }
     }
 
     private void addOrigenMarker(String origen) {
-        if (Mtrack != null) {
-            Mtrack.remove();
+        if (originMarker != null) {
+            originMarker.remove();
         }
 
         if (!origen.equals("")) {
-            midPoint(latmovil, lonmovil, latOrigen, lonOrigen);
+            //midPoint(latmovil, lonmovil, latOrigen, lonOrigen);
+            String[] separated = origen.split(",");
+            latOrigen = Double.parseDouble(separated[0]);
+            lonOrigen = Double.parseDouble(separated[1]);
+
+            originMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latOrigen, lonOrigen)).title("Origen"));
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+            builder.include(originMarker.getPosition());
+            builder.include(movilMarker.getPosition());
+
+            LatLngBounds bounds = builder.build();
+
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 80);
+            googleMap.animateCamera(cu);
         } else {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
         }
 
-        Mtrack = googleMap.addMarker(new MarkerOptions().position(new LatLng(latmovil, lonmovil)).title("Movil"));
+        //movilMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latmovil, lonmovil)).title("Movil"));
     }
 
     //Location fin
@@ -205,6 +227,10 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
         super.onResume();
         locationHelper.onResume(MapActivity.this);
         EventBus.getDefault().register(this);
+
+        if (latlonOrigen.equals("")) {
+            ServiceUtils.asCoordenadas(MapActivity.this);
+        }
     }
 
     @Override
@@ -222,22 +248,15 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
         googleMap.getUiSettings().setZoomGesturesEnabled(true);
         //-34.935506,-57.9556878
         final LatLng Inicio = new LatLng(latmovil, lonmovil);
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
-        Marker TP = googleMap.addMarker(new MarkerOptions().position(Inicio).title("Movil"));
+        //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latmovil, lonmovil), 17.0f));
+        movilMarker = googleMap.addMarker(new MarkerOptions().alpha(0.5f).position(Inicio).title("Movil"));
 
         //TEST///
         //latlonOrigen="-34.935506,-57.9556878";
         if (!latlonOrigen.equals("")) {
             Log.d(tag_remis, "marcador****LATLON  NOvacio");
             String[] separated = latlonOrigen.split(",");
-            latOrigen = Double.parseDouble(separated[0]);
-            lonOrigen = Double.parseDouble(separated[1]);
-            final LatLng Origen = new LatLng(latOrigen, lonOrigen);
-            Marker Ori = googleMap.addMarker(new MarkerOptions()
-                    .position(Origen)
-                    .title("Origen")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-            midPoint(latmovil, lonmovil, latOrigen, lonOrigen);
+            addOrigenMarker(latlonOrigen);
         }
     }
 }

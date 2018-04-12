@@ -2,12 +2,12 @@ package com.nomade.movilremiscar.remiscarmovil;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Picture;
 import android.location.Location;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -15,11 +15,12 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         initializeUI();
         inicializarDatos();
         checkConnection();
-
+        checkLocationService();
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
@@ -204,24 +205,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             final WebView newView = view;
 
 
-                newView.postDelayed(new Runnable() {
-                    public void run() {
-                        if (newView.getProgress() == 100) {
-                            newView.postDelayed(new Runnable() {
-                                public void run() {
-                                    newView.scrollTo(0, 0);
-                                    //pageloaded = true;
-                                }
-                            }, 10);
-                        } else {
-                            newView.post(this);
-                        }
+            newView.postDelayed(new Runnable() {
+                public void run() {
+                    if (newView.getProgress() == 100) {
+                        newView.postDelayed(new Runnable() {
+                            public void run() {
+                                newView.scrollTo(0, 0);
+                                //pageloaded = true;
+                            }
+                        }, 10);
+                    } else {
+                        newView.post(this);
                     }
-                }, 100);
+                }
+            }, 100);
 
 
         }
-
 
 
         // here you execute an action when the URL you want is about to load
@@ -464,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void getSingleLocation() {
-        if(sharedPrefs != null) {
+        if (sharedPrefs != null) {
             Location singleLocation = locationHelper.getLastLocation();
             sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
             sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
@@ -941,9 +941,43 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if (textNroMovil.getText().toString().equals("00")) {
             textNroMovil.setText(movil.toString());
         }
-        if(movil.equals("")){
+        if (movil.equals("")) {
             ServiceUtils.asValidarUsuario(mContext);
         }
 
+    }
+
+    public void checkLocationService() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+        }
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+        }
+        if (!gps_enabled && !network_enabled) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage(R.string.gps_disabled);
+            dialog.setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                }
+            });
+            dialog.setNegativeButton(R.string.cancelar, new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(mContext, "La aplicación no funcionará correctamente si no activa la localización del equipo.", Toast.LENGTH_LONG).show();
+
+                }
+            });
+            dialog.show();
+        }
     }
 }

@@ -32,4 +32,7 @@
     <string name="title_activity_crono">CronoActivity</string>
     <string name="title_activity_alerta">AlertaActivity</string>
     <string name="title_activity_copiado">CopiadoActivity</string>
+    <string name="gps_disabled">GPS desactivado. Actívelo para el correcto funcionamiento.</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="settings">Ir a ajustes</string>
 </resources>
