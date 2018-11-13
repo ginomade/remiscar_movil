@@ -709,6 +709,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             // check for success tag
 
             int success = data.get(TAG_SUCCESS).getAsInt();
+            //TEST
+            success = 1;
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
                     movil = data.get("movil").getAsString();

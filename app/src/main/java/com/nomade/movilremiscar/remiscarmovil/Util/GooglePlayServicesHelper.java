@@ -14,9 +14,11 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -42,6 +44,8 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
 
     Context mContext;
 
+    FusedLocationProviderClient mLocationClient;
+
     public GooglePlayServicesHelper(Context context, boolean gpsOn) {
 
         log("GooglePlayServicesHelper(), gpsOn: " + gpsOn);
@@ -57,6 +61,8 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
 
         mGoogleApiClient = builder.build();
         mContext = context;
+
+        mLocationClient = new FusedLocationProviderClient(context);
     }
 
     // Conecta no Google Play Services
@@ -110,7 +116,8 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            mLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
         }
     }
 
@@ -143,14 +150,29 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
 
     }
 
+    public OnSuccessListener<Location> locationSuccessListener(){
+        return new OnSuccessListener<Location>(){
+            @Override
+            public void onSuccess(Location location) {
+
+            }
+        };
+    }
+
     public Location getLastLocation() {
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
         }
-        Location l = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-
+        /*Location l = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);*/
+        final Location l;
+        mLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                l = location;
+            }
+        });
         return l;
     }
 
