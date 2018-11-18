@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ////log en sdcard
         // setear el IF a true para generar el log
 
-        if (flg_logsd) {
+        if (true) {
             File storageDir = new File(Environment
                     .getExternalStorageDirectory(), "/remiscar/");
 
@@ -145,10 +145,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             try {
 
                 if (outfile == null) {
-                    outfile = File.createTempFile("remiscarLog", ".txt", storageDir);
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                    String currentDateandTime = sdf.format(new Date());
+                    outfile = File.createTempFile("remiscarLog_" + currentDateandTime + "_", ".txt", storageDir);
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -342,6 +343,51 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+    public void logLocationToSdcard(String statement) {
+        // generacion de log en memoria sd del equipo
+
+        ///////////////////TEST///////////////////
+
+        if (flg_logsd) {
+
+            Log.d("Remiscar -", "inside logtosdcard$$");
+
+            String state = android.os.Environment.getExternalStorageState();
+            if (!state.equals(android.os.Environment.MEDIA_MOUNTED)) {
+                try {
+                    throw new IOException("SD Card is not mounted.  It is " + state + ".");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String currentDateandTime = sdf.format(new Date());
+
+
+            try {
+
+
+                try (FileOutputStream fOut = new FileOutputStream(outfile, true)) {
+                    OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                    myOutWriter.append(currentDateandTime + " " + "LOC" + "     ");
+                    myOutWriter.append(statement);
+                    myOutWriter.append("\n");
+                    myOutWriter.flush();
+                    myOutWriter.close();
+                    fOut.close();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+    }
+
     public void logToSdcard(String tag, String statement) {
         // generacion de log en memoria sd del equipo
 
@@ -514,6 +560,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         Log.d("Remiscar ", " - set location -" + str);
         logToSdcard("Remiscar ", " - set location -" + str);
+        logLocationToSdcard(" - set location -" + str);
         lat = (Double) location.getLatitude();
         lon = (Double) location.getLongitude();
         ////////////////////TEST///////////
