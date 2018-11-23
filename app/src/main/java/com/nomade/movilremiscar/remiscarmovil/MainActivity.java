@@ -161,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         checkConnection();
         checkLocationService();
 
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+        /*AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);*/
 
         ServiceUtils.asValidarUsuario(mContext);
 
@@ -724,7 +724,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     Double location_lon = location.getDouble("lng");
                     ObtCoordenadas = String.valueOf(location_lat) + "," + String.valueOf(location_lon);
                     sharedPrefs.saveString("latlonOrigen", ObtCoordenadas);
-                    sharedPrefs.saveString("geopos", ObtCoordenadas);
 
                     Log.d("REMISCAR - ", " ADDRESS OK-" + ObtCoordenadas);
                     logToSdcard("REMISCAR - ", " ADDRESS OK-" + ObtCoordenadas);
@@ -754,7 +753,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             Log.d("Remiscar* - ", "Login Response " + data.toString());
             logToSdcard("Remiscar - ", "Login Response " + data.toString());
             // check for success tag
-
+            //para TEST success = 1;
             int success = data.get(TAG_SUCCESS).getAsInt();
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
@@ -931,6 +930,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             Log.d("Remiscar -", "s- " + success);
             logToSdcard("Remiscar -", "s- " + success);
+            if(result.has("zona")){
+                int retZona = result.get("zona").getAsInt();
+                logLocationToSdcard(Integer.toString(retZona));
+            }
+
 
             if (success == 0) {
                 Log.d("Remiscar -", "sin mensajes.");

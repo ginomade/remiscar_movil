@@ -36,8 +36,6 @@ public class PollingManager {
         @Override
         public void run() {
 
-
-
             if(Utils.esMultiplo(clearCacheCounter, 5)){
                 // con n=5 y INTERVAL = 20 segundos ejecuta cada 1 minuto
                 ServiceUtils.asAuto(mContext);
