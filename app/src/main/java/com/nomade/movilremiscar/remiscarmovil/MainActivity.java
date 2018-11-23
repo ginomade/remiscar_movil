@@ -810,6 +810,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             JsonObject result = data.getObject();
             Log.d("Remiscar A- alerta r-", result.toString());
             logToSdcard("Remiscar - alerta r-", result.toString());
+            logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
             //success = json.getInt(TAG_SUCCESS);
             //al_status, al_geopos, al_movil, al_fecha, al_ubicacion
 
@@ -933,6 +934,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             if(result.has("zona")){
                 int retZona = result.get("zona").getAsInt();
                 logLocationToSdcard(Integer.toString(retZona));
+                logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
             }
 
 
