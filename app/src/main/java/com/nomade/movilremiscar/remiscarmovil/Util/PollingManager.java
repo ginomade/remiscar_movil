@@ -40,7 +40,7 @@ public class PollingManager {
                 // con n=5 y INTERVAL = 20 segundos ejecuta cada 1 minuto
                 ServiceUtils.asAuto(mContext);
                 ServiceUtils.asMensaje(mContext);
-                ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""), prefs.getString("geopos", ""));
+                ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""));
                 ServiceUtils.asCoordenadas(mContext);
             }
 

@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -542,13 +541,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     //Obtener numero de imei
     private String getPhoneImei() {
+        String imei = "";
         TelephonyManager mTelephonyManager;
         mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-
+            imei = mTelephonyManager.getDeviceId();
         }
-        return mTelephonyManager.getDeviceId();
+        return imei;
     }
 
 
@@ -931,12 +931,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             Log.d("Remiscar -", "s- " + success);
             logToSdcard("Remiscar -", "s- " + success);
-            if(result.has("zona")){
+            /*if(result.has("zona")){
                 int retZona = result.get("zona").getAsInt();
                 logLocationToSdcard(Integer.toString(retZona));
                 logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
-            }
+            }*/
 
+            getSingleLocation();
 
             if (success == 0) {
                 Log.d("Remiscar -", "sin mensajes.");

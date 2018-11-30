@@ -180,10 +180,12 @@ public class ServiceUtils {
      * Background Async Task verificar status de Panico
      */
     public static void asAlert(Context context,
-                               String direccion,
-                               String geopos) {
+                               String direccion) {
         String url_params = url_alerta + "?IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
-                "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") + "&Ubicacion=" + direccion + "&GeoPos=" + geopos + "&movil_al=";
+                "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
+                + "&Ubicacion=" + direccion
+                + "&GeoPos=" + SharedPrefsUtil.getInstance(context).getString("geopos", "")
+                + "&movil_al=";
         Ion.with(context)
                 .load(url_params)
                 .asJsonObject()
