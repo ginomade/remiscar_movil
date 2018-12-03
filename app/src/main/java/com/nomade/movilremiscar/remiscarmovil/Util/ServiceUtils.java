@@ -212,6 +212,7 @@ public class ServiceUtils {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
                         try {
+                            Log.d("Remiscar* ", "error en asValidarUsuario." + result.toString());
                             if (result != null) {
                                 ValidacionEvent event = new ValidacionEvent();
                                 event.setObject(result);

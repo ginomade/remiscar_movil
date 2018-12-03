@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ////log en sdcard
         // setear el IF a true para generar el log
 
-        if (true) {
+        if (flg_logsd) {
             File storageDir = new File(Environment
                     .getExternalStorageDirectory(), "/remiscar/");
 
@@ -160,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         checkConnection();
         checkLocationService();
 
-        /*AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);*/
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
         ServiceUtils.asValidarUsuario(mContext);
 
@@ -546,8 +547,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            imei = mTelephonyManager.getDeviceId();
+
         }
+        imei = mTelephonyManager.getDeviceId();
+        Log.d("Remiscar ", " - set imei -" + imei);
         return imei;
     }
 
@@ -992,7 +995,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onPollingStep(PollingEvent event) {
         pa = 0;//reset boton de panico
         flg_origen = 0;
-        if (textNroMovil.getText().toString().equals("00")) {
+        if (textNroMovil.getText().toString().equals("00")
+                || textNroMovil.getText().toString().equals("")) {
             textNroMovil.setText(movil.toString());
         }
         if (movil.equals("")) {
