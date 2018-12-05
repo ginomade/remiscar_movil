@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -33,9 +32,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationListener;
 import com.google.gson.JsonObject;
-import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.LocationRequester;
 import com.nomade.movilremiscar.remiscarmovil.Util.PollingManager;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
@@ -65,7 +63,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class MainActivity extends AppCompatActivity implements LocationListener {
+public class MainActivity extends AppCompatActivity implements LocationRequester.LocationListener {
 
     String t = "0"; //mensajes test
     private String imei, Direccion;
@@ -100,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     FrameLayout frmAlerta, frmStatusLoc, frmStatusOrigen;
 
-    private GooglePlayServicesHelper locationHelper;
+    private LocationRequester locationHelper;
 
     String[] mPermission = {Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -129,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             checkPermissions();
         }
 
-        locationHelper = new GooglePlayServicesHelper(this, true);
+        locationHelper = new LocationRequester(this);
 
 
         ////////////TEST////////////////////////////
@@ -177,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ServiceUtils.asAuto(mContext);
         ServiceUtils.asMensaje(mContext);
         ServiceUtils.asCoordenadas(mContext);
+        locationHelper.getLocation();
     }
 
     private void setMainView() {
@@ -296,10 +295,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             @Override
             public void onClick(View arg0) {
-                getSingleLocation();
                 Intent intent = new Intent(MainActivity.this, AlertaActivity.class);
                 startActivity(intent);
-
             }
 
         });
@@ -496,25 +493,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onPause() {
         super.onPause();
         pollingManager.stopRepeatingTask();
-        locationHelper.onPause();
         EventBus.getDefault().unregister(this);
+        locationHelper.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         EventBus.getDefault().register(this);
-        locationHelper.onResume(MainActivity.this);
         pollingManager.startRepeatingTask();
 
-    }
-
-    private void getSingleLocation() {
-        if (sharedPrefs != null) {
-            Location singleLocation = locationHelper.getLastLocation();
-            sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
-            sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
-        }
     }
 
     @Override
@@ -549,30 +537,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         }
         return mTelephonyManager.getDeviceId();
-    }
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-
-        String str = location.getLatitude() + "," + location.getLongitude();
-
-        Log.d("Remiscar ", " - set location -" + str);
-        logToSdcard("Remiscar ", " - set location -" + str);
-        logLocationToSdcard(" - set location -" + str);
-        lat = (Double) location.getLatitude();
-        lon = (Double) location.getLongitude();
-        ////////////////////TEST///////////
-        /*lat = -54.805006;
-        lon = -68.330199;
-        str = lat.toString()+","+lon.toString();*/
-        ////////////////////TEST///////////
-        geopos = str;
-        sharedPrefs.saveFloat("latmovil", lat.floatValue());
-        sharedPrefs.saveFloat("lonmovil", lon.floatValue());
-        sharedPrefs.saveString("geopos", str);
-
     }
 
     public void getMyLocationAddress() {
@@ -931,7 +895,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             Log.d("Remiscar -", "s- " + success);
             logToSdcard("Remiscar -", "s- " + success);
-            if(result.has("zona")){
+            if (result.has("zona")) {
                 int retZona = result.get("zona").getAsInt();
                 logLocationToSdcard(Integer.toString(retZona));
                 logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
@@ -998,6 +962,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ServiceUtils.asValidarUsuario(mContext);
         }
 
+        locationHelper.getLocation();
+
     }
 
     public void checkLocationService() {
@@ -1032,5 +998,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             });
             dialog.show();
         }
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        String str = location.getLatitude() + "," + location.getLongitude();
+
+        Log.d("Remiscar ", " - set location -" + str);
+        logToSdcard("Remiscar ", " - set location -" + str);
+        logLocationToSdcard(" - set location -" + str);
+        lat = (Double) location.getLatitude();
+        lon = (Double) location.getLongitude();
+        ////////////////////TEST///////////
+        /*lat = -54.805006;
+        lon = -68.330199;
+        str = lat.toString()+","+lon.toString();*/
+        ////////////////////TEST///////////
+        geopos = str;
+        sharedPrefs.saveFloat("latmovil", lat.floatValue());
+        sharedPrefs.saveFloat("lonmovil", lon.floatValue());
+        sharedPrefs.saveString("geopos", str);
     }
 }

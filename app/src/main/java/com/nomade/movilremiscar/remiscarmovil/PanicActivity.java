@@ -11,11 +11,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationListener;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.LocationRequester;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
@@ -24,7 +23,7 @@ import java.net.URLEncoder;
 
 
 //pantalla de envio de mensaje de alerta
-public class PanicActivity extends Activity implements LocationListener {
+public class PanicActivity extends Activity implements LocationRequester.LocationListener {
 
     Button prueba, alerta, inicio;
     EditText edit;
@@ -41,7 +40,7 @@ public class PanicActivity extends Activity implements LocationListener {
     //coordenadas del movil.
     Double latmovil, lonmovil;
 
-    private GooglePlayServicesHelper locationHelper;
+    private LocationRequester locationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +49,7 @@ public class PanicActivity extends Activity implements LocationListener {
 
         sharedPrefs = SharedPrefsUtil.getInstance(PanicActivity.this);
 
-        locationHelper = new GooglePlayServicesHelper(this, true);
+        locationHelper = new LocationRequester(this);
 
         imei = sharedPrefs.getString("imei", "");
         //imei = "359015062458232";//TEST/////
@@ -110,7 +109,7 @@ public class PanicActivity extends Activity implements LocationListener {
 
         });
 
-
+        locationHelper.getLocation();
     }
 
     @Override
@@ -123,7 +122,6 @@ public class PanicActivity extends Activity implements LocationListener {
     @Override
     protected void onResume() {
         super.onResume();
-        locationHelper.onResume(PanicActivity.this);
     }
 
     @Override
@@ -254,7 +252,7 @@ public class PanicActivity extends Activity implements LocationListener {
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void setLocation(Location location) {
         latmovil = (Double) location.getLatitude();
         lonmovil = (Double) location.getLongitude();
         String str = location.getLatitude() + "," + location.getLongitude();
@@ -264,22 +262,5 @@ public class PanicActivity extends Activity implements LocationListener {
         sharedPrefs.saveFloat("lonmovil", lonmovil.floatValue());
         sharedPrefs.saveString("geopos", str);
     }
-
-    private void getSingleLocation() {
-        if (sharedPrefs != null && locationHelper != null) {
-            try {
-                Location singleLocation = locationHelper.getLastLocation();
-                sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
-                sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
-                String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
-                geopos = str;
-                sharedPrefs.saveString("geopos", str);
-                Log.d("Remiscar ", " -panicActivity getSingleLocation -" + str);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
 }
 

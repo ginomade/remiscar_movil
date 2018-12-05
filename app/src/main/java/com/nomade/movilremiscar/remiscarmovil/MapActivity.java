@@ -10,20 +10,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.JsonObject;
-import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.LocationRequester;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
@@ -34,7 +32,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 
 
-public class MapActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback {
+public class MapActivity extends AppCompatActivity implements LocationRequester.LocationListener, OnMapReadyCallback {
 
     Double latmovil, lonmovil, latOrigen, lonOrigen;
     GoogleMap googleMap;
@@ -44,7 +42,7 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
     String strMovil;
     Handler mHandler;
     String tag_remis = "remiscar map ";
-    GooglePlayServicesHelper locationHelper;
+    private LocationRequester locationHelper;
     SharedPrefsUtil prefs;
 
     @Override
@@ -68,11 +66,6 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
         prefs = SharedPrefsUtil.getInstance(this);
         latmovil = (double) prefs.getFloat("latmovil", 0);
         lonmovil = (double) prefs.getFloat("lonmovil", 0);
-        /*if (latmovil == 0) {
-            Location newLocation = locationHelper.getLastLocation();
-            latmovil = newLocation.getLatitude();
-            lonmovil = newLocation.getLongitude();
-        }*/
         latlonOrigen = prefs.getString("latlonOrigen", "");
         imei = prefs.getString("imei", "");
         movil = prefs.getString("movil", "");
@@ -85,9 +78,8 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        locationHelper = new GooglePlayServicesHelper(MapActivity.this, true);
-
-
+        locationHelper = new LocationRequester(MapActivity.this);
+        locationHelper.getLocation();
     }
 
     @Subscribe
@@ -123,30 +115,6 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-        Log.d(tag_remis, " - set location");
-        strMovil = location.getLatitude() + "," + location.getLongitude();
-        latmovil = (Double) location.getLatitude();
-        lonmovil = (Double) location.getLongitude();
-
-        if (movilMarker != null) {
-            movilMarker.remove();
-        }
-        final LatLng Inicio = new LatLng(latmovil, lonmovil);
-        movilMarker = googleMap.addMarker(new MarkerOptions().alpha(0.5f).position(Inicio).title("Movil"));
-        addOrigenMarker(latlonOrigen);
-
-        //path en mapa
-        listLocs.add(location);
-        drawPrimaryLinePath(listLocs);
-
-        if (latlonOrigen.equals("")) {
-            ServiceUtils.asCoordenadas(MapActivity.this);
-        }
     }
 
     private void addOrigenMarker(String origen) {
@@ -225,7 +193,6 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
     @Override
     protected void onResume() {
         super.onResume();
-        locationHelper.onResume(MapActivity.this);
         EventBus.getDefault().register(this);
 
         if (latlonOrigen.equals("")) {
@@ -257,6 +224,28 @@ public class MapActivity extends AppCompatActivity implements LocationListener, 
             Log.d(tag_remis, "marcador****LATLON  NOvacio");
             String[] separated = latlonOrigen.split(",");
             addOrigenMarker(latlonOrigen);
+        }
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        strMovil = location.getLatitude() + "," + location.getLongitude();
+        latmovil = (Double) location.getLatitude();
+        lonmovil = (Double) location.getLongitude();
+
+        if (movilMarker != null) {
+            movilMarker.remove();
+        }
+        final LatLng Inicio = new LatLng(latmovil, lonmovil);
+        movilMarker = googleMap.addMarker(new MarkerOptions().alpha(0.5f).position(Inicio).title("Movil"));
+        addOrigenMarker(latlonOrigen);
+
+        //path en mapa
+        listLocs.add(location);
+        drawPrimaryLinePath(listLocs);
+
+        if (latlonOrigen.equals("")) {
+            ServiceUtils.asCoordenadas(MapActivity.this);
         }
     }
 }
