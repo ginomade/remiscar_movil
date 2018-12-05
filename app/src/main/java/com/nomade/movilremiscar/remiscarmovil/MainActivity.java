@@ -511,9 +511,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private void getSingleLocation() {
         if (sharedPrefs != null) {
             Location singleLocation = locationHelper.getLastLocation();
-            sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
-            sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
+            saveLocationData(singleLocation);
         }
+    }
+
+    private void saveLocationData(Location singleLocation) {
+        sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
+        sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
+        String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
+        sharedPrefs.saveString("geopos", str);
     }
 
     @Override
@@ -569,10 +575,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         str = lat.toString()+","+lon.toString();*/
         ////////////////////TEST///////////
         geopos = str;
-        sharedPrefs.saveFloat("latmovil", lat.floatValue());
-        sharedPrefs.saveFloat("lonmovil", lon.floatValue());
-        sharedPrefs.saveString("geopos", str);
-
+        saveLocationData(location);
     }
 
     public void getMyLocationAddress() {
