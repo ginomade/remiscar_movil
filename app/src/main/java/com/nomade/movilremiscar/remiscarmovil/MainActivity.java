@@ -180,10 +180,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void setMainView() {
-
+        String geoposLocal = sharedPrefs.getString("geopos", "");
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
-                + "&geopos=" + geopos;
+                + "&geopos=" + geoposLocal;
         mWebView = (WebView) findViewById(R.id.webViewMain);
 
         mWebView.setWebViewClient(mainWebClient);
@@ -521,6 +521,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
         String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
         sharedPrefs.saveString("geopos", str);
+        Log.d("Remiscar ", "saveLocationData -" + str);
     }
 
     @Override
@@ -563,22 +564,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
-
-
-        String str = location.getLatitude() + "," + location.getLongitude();
-
-        Log.d("Remiscar ", " - set location -" + str);
-        logToSdcard("Remiscar ", " - set location -" + str);
-        logLocationToSdcard(" - set location -" + str);
-        lat = (Double) location.getLatitude();
-        lon = (Double) location.getLongitude();
-        ////////////////////TEST///////////
+////////////////////TEST///////////
         /*lat = -54.805006;
         lon = -68.330199;
         str = lat.toString()+","+lon.toString();*/
         ////////////////////TEST///////////
+
+        String str = location.getLatitude() + "," + location.getLongitude();
+
+       /* Log.d("Remiscar ", " - set location -" + str);
+        logToSdcard("Remiscar ", " - set location -" + str);
+        logLocationToSdcard(" - set location -" + str);
+        lat = (Double) location.getLatitude();
+        lon = (Double) location.getLongitude();
         geopos = str;
-        saveLocationData(location);
+        saveLocationData(location);*/
     }
 
     public void getMyLocationAddress() {
@@ -943,7 +943,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
             }*/
 
-            getSingleLocation();
+
 
             if (success == 0) {
                 Log.d("Remiscar -", "sin mensajes.");
@@ -1006,6 +1006,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ServiceUtils.asValidarUsuario(mContext);
         }
 
+        getSingleLocation();
     }
 
     public void checkLocationService() {
