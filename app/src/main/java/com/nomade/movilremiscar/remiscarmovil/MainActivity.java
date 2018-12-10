@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     /////////////TEST/////////////
     // setear a true para generar el log en memoria sd del equipo.
     boolean flg_logsd = false;
+    boolean flg_logsdLOC = false;
     /////////////TEST/////////////
 
     FrameLayout frmAlerta, frmStatusLoc, frmStatusOrigen;
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ////log en sdcard
         // setear el IF a true para generar el log
 
-        if (flg_logsd) {
+        if (flg_logsd || flg_logsdLOC) {
             File storageDir = new File(Environment
                     .getExternalStorageDirectory(), "/remiscar/");
 
@@ -181,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private void setMainView() {
         String geoposLocal = sharedPrefs.getString("geopos", "");
+        logLocationToSdcard("setMainView - " + geoposLocal);
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
                 + "&geopos=" + geoposLocal;
@@ -348,9 +350,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         ///////////////////TEST///////////////////
 
-        if (flg_logsd) {
-
-            Log.d("Remiscar -", "inside logtosdcard$$");
+        if (flg_logsdLOC) {
 
             String state = android.os.Environment.getExternalStorageState();
             if (!state.equals(android.os.Environment.MEDIA_MOUNTED)) {
@@ -522,6 +522,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
         sharedPrefs.saveString("geopos", str);
         Log.d("Remiscar ", "saveLocationData -" + str);
+        logLocationToSdcard("saveLocationData - " + str);
     }
 
     @Override
@@ -937,13 +938,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             Log.d("Remiscar -", "s- " + success);
             logToSdcard("Remiscar -", "s- " + success);
-            /*if(result.has("zona")){
-                int retZona = result.get("zona").getAsInt();
-                logLocationToSdcard(Integer.toString(retZona));
-                logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
-            }*/
-
-
 
             if (success == 0) {
                 Log.d("Remiscar -", "sin mensajes.");
