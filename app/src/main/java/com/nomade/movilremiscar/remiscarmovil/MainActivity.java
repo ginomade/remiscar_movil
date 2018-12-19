@@ -565,21 +565,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
-////////////////////TEST///////////
-        /*lat = -54.805006;
-        lon = -68.330199;
-        str = lat.toString()+","+lon.toString();*/
-        ////////////////////TEST///////////
-
-        String str = location.getLatitude() + "," + location.getLongitude();
-
-       /* Log.d("Remiscar ", " - set location -" + str);
-        logToSdcard("Remiscar ", " - set location -" + str);
-        logLocationToSdcard(" - set location -" + str);
-        lat = (Double) location.getLatitude();
-        lon = (Double) location.getLongitude();
-        geopos = str;
-        saveLocationData(location);*/
+        // metodo vacio.
+        // la localizacion se obtiene en getSingleLocation().
     }
 
     public void getMyLocationAddress() {
@@ -876,7 +863,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Subscribe()
     public void processMensaje(MensajeEvent data) {
         //reenvio a url de Mviajeshoy.php para actualizar datos de geopos.
-        setMainView();
 
         int success;
         JsonObject result = new JsonObject();
@@ -1001,6 +987,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         getSingleLocation();
+        setMainView();
+
     }
 
     public void checkLocationService() {

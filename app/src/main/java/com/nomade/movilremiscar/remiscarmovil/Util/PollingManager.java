@@ -36,7 +36,7 @@ public class PollingManager {
         @Override
         public void run() {
 
-            if(Utils.esMultiplo(clearCacheCounter, 5)){
+            if (Utils.esMultiplo(clearCacheCounter, 5)) {
                 // con n=5 y INTERVAL = 20 segundos ejecuta cada 1 minuto
                 ServiceUtils.asAuto(mContext);
                 ServiceUtils.asMensaje(mContext);
@@ -51,7 +51,7 @@ public class PollingManager {
                 Log.w("Remiscar*", "***** CLEAR CACHE *****");
             }
 
-            if(mProcessDelay >= 25){
+            if (mProcessDelay >= 25) {
                 // 25 corresponde a 5 minutos con Interval=20 segundos.
                 mProcessDelay = 0;
                 //ServiceUtils.asCoordenadas(mContext);
@@ -66,7 +66,7 @@ public class PollingManager {
     };
 
     public void startRepeatingTask() {
-        if (flg_run == 0){
+        if (flg_run == 0) {
             mHandlerTask.run();
             flg_run = 1;
         }
