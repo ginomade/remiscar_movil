@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
+import com.nomade.movilremiscar.remiscarmovil.events.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -42,6 +43,8 @@ public class PollingManager {
                 ServiceUtils.asMensaje(mContext);
                 ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""));
                 ServiceUtils.asCoordenadas(mContext);
+
+                EventBus.getDefault().post(new PollingEvent());
             }
 
             clearCacheCounter++; // 180 == 1 hora
@@ -59,7 +62,7 @@ public class PollingManager {
             }
             mProcessDelay++;
 
-            EventBus.getDefault().post(new PollingEvent());
+            EventBus.getDefault().post(new MinutePollingEvent());
 
             mHandler.postDelayed(mHandlerTask, INTERVAL);
         }

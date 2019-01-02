@@ -45,6 +45,7 @@ import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
@@ -976,6 +977,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Subscribe
     public void onPollingStep(PollingEvent event) {
+        getSingleLocation();
+    }
+
+    @Subscribe
+    public void onPollingStep(MinutePollingEvent event) {
         pa = 0;//reset boton de panico
         flg_origen = 0;
         if (textNroMovil.getText().toString().equals("00")
@@ -986,9 +992,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ServiceUtils.asValidarUsuario(mContext);
         }
 
-        getSingleLocation();
         setMainView();
-
     }
 
     public void checkLocationService() {
