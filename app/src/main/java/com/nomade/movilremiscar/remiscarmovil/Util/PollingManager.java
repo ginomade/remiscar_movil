@@ -42,8 +42,6 @@ public class PollingManager {
                 ServiceUtils.asMensaje(mContext);
                 ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""));
                 ServiceUtils.asCoordenadas(mContext);
-
-                EventBus.getDefault().post(new MinutePollingEvent());
             }
 
             // PERIODO 1 HORA
@@ -55,6 +53,11 @@ public class PollingManager {
             // PERIODO 5 MINUTOS
             if (Utils.esMultiplo(counter, 30)) {
                 ServiceUtils.asMensaje(mContext);
+            }
+
+            // PERIODO 3 MINUTOS
+            if (Utils.esMultiplo(counter, 18)) {
+                EventBus.getDefault().post(new MinutePollingEvent());
             }
 
             // PERIODO 20 SEGUNDOS
