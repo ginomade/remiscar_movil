@@ -19,14 +19,12 @@ public class PollingManager {
 
     Context mContext;
 
-    private int clearCacheCounter = 0;
     int flg_run = 0; // flag repeating task running
     //seteo de intervalo de actualizacion de datos
-    private final static int INTERVAL = 20 * 1000; // segundos
+    private final static int INTERVAL = 10000; // 10segundos
     Handler mHandler;
     SharedPrefsUtil prefs;
-    int mProcessDelay = 0;
-
+    int counter = 0;
     public PollingManager(Context context) {
         mContext = context;
         mHandler = new Handler();
@@ -36,33 +34,38 @@ public class PollingManager {
     Runnable mHandlerTask = new Runnable() {
         @Override
         public void run() {
+            counter++;
 
-            if (Utils.esMultiplo(clearCacheCounter, 5)) {
-                // con n=5 y INTERVAL = 20 segundos ejecuta cada 1 minuto
+            // PERIODO 1 MINUTO
+            if (Utils.esMultiplo(counter, 6)) {
                 ServiceUtils.asAuto(mContext);
                 ServiceUtils.asMensaje(mContext);
                 ServiceUtils.asAlert(mContext, prefs.getString("Direccion", ""));
                 ServiceUtils.asCoordenadas(mContext);
 
-                EventBus.getDefault().post(new PollingEvent());
+                EventBus.getDefault().post(new MinutePollingEvent());
             }
 
-            clearCacheCounter++; // 180 == 1 hora
-            if (clearCacheCounter >= (180 * 1)) {
+            // PERIODO 1 HORA
+            if (Utils.esMultiplo(counter, 360)) {
                 deleteCache(mContext);
-                clearCacheCounter = 0;
                 Log.w("Remiscar*", "***** CLEAR CACHE *****");
             }
 
-            if (mProcessDelay >= 25) {
-                // 25 corresponde a 5 minutos con Interval=20 segundos.
-                mProcessDelay = 0;
-                //ServiceUtils.asCoordenadas(mContext);
+            // PERIODO 5 MINUTOS
+            if (Utils.esMultiplo(counter, 30)) {
                 ServiceUtils.asMensaje(mContext);
             }
-            mProcessDelay++;
 
-            EventBus.getDefault().post(new MinutePollingEvent());
+            // PERIODO 20 SEGUNDOS
+            if (Utils.esMultiplo(counter, 2)) {
+                EventBus.getDefault().post(new PollingEvent());
+            }
+
+            //RESET COUNTER
+            if(counter > 360) {
+                counter = 0;
+            }
 
             mHandler.postDelayed(mHandlerTask, INTERVAL);
         }

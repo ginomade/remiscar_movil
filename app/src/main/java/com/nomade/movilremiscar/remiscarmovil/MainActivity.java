@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     Double lat = 0.0;
     Double lon = 0.0;
 
+    private boolean fastReload = true;
+
     Button buttonMap, buttonNov, buttonPanico;
     ImageButton reloadButton;
 
@@ -208,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public void onPageFinished(WebView view, String url) {
             final WebView newView = view;
 
-
+            fastReload = !url.contains("transfer");
             newView.postDelayed(new Runnable() {
                 public void run() {
                     if (newView.getProgress() == 100) {
@@ -226,14 +228,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
         }
-
-
-        // here you execute an action when the URL you want is about to load
-        @Override
-        public void onLoadResource(WebView view, String url) {
-
-        }
-
 
     };
 
@@ -557,8 +551,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
+        } else {
+            imei = mTelephonyManager.getDeviceId();
         }
-        imei = mTelephonyManager.getDeviceId();
         Log.d("Remiscar ", " - set imei -" + imei);
         return imei;
     }
@@ -977,11 +972,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Subscribe
     public void onPollingStep(PollingEvent event) {
-        getSingleLocation();
+        if(fastReload){
+            processPollingStep();
+        }
+
     }
 
     @Subscribe
-    public void onPollingStep(MinutePollingEvent event) {
+    public void onMinutePollingStep(MinutePollingEvent event) {
+        if(!fastReload){
+            processPollingStep();
+        }
+    }
+
+    private void processPollingStep() {
         pa = 0;//reset boton de panico
         flg_origen = 0;
         if (textNroMovil.getText().toString().equals("00")
@@ -991,7 +995,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if (movil.equals("")) {
             ServiceUtils.asValidarUsuario(mContext);
         }
-
+        getSingleLocation();
         setMainView();
     }
 
