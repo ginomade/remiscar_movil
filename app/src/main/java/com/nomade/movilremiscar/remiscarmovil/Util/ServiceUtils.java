@@ -180,10 +180,13 @@ public class ServiceUtils {
      * Background Async Task verificar status de Panico
      */
     public static void asAlert(Context context,
-                               String direccion,
-                               String geopos) {
+                               String direccion) {
+        String geoposLocal = SharedPrefsUtil.getInstance(context).getString("geopos", "");
         String url_params = url_alerta + "?IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
-                "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") + "&Ubicacion=" + direccion + "&GeoPos=" + geopos + "&movil_al=";
+                "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
+                + "&Ubicacion=" + direccion
+                + "&GeoPos=" + geoposLocal;
+        Log.d("Remiscar* ", "asAlert. LOC - " + url_params);
         Ion.with(context)
                 .load(url_params)
                 .asJsonObject()
@@ -210,6 +213,7 @@ public class ServiceUtils {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
                         try {
+                            Log.d("Remiscar* ", "error en asValidarUsuario." + result.toString());
                             if (result != null) {
                                 ValidacionEvent event = new ValidacionEvent();
                                 event.setObject(result);

@@ -21,9 +21,8 @@ public class SharedPrefsUtil {
     }
 
     private SharedPrefsUtil(Context context) {
-        prefs = context.getSharedPreferences(SHARED_PREFS_NAME,Context.MODE_PRIVATE);
+        prefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
     }
-
 
 
     public void saveString(String key, String value) {

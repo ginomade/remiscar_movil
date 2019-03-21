@@ -45,6 +45,7 @@ import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
@@ -79,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     Double lat = 0.0;
     Double lon = 0.0;
 
+    private boolean fastReload = true;
+
     Button buttonMap, buttonNov, buttonPanico;
     ImageButton reloadButton;
 
@@ -96,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     /////////////TEST/////////////
     // setear a true para generar el log en memoria sd del equipo.
     boolean flg_logsd = false;
+    boolean flg_logsdLOC = false;
     /////////////TEST/////////////
 
     FrameLayout frmAlerta, frmStatusLoc, frmStatusOrigen;
@@ -136,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         ////log en sdcard
         // setear el IF a true para generar el log
 
-        if (true) {
+        if (flg_logsd || flg_logsdLOC) {
             File storageDir = new File(Environment
                     .getExternalStorageDirectory(), "/remiscar/");
 
@@ -161,8 +165,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         checkConnection();
         checkLocationService();
 
-        /*AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);*/
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
         ServiceUtils.asValidarUsuario(mContext);
 
@@ -180,10 +184,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void setMainView() {
-
+        String geoposLocal = sharedPrefs.getString("geopos", "");
+        logLocationToSdcard("setMainView - " + geoposLocal);
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
-                + "&geopos=" + geopos;
+                + "&geopos=" + geoposLocal;
         mWebView = (WebView) findViewById(R.id.webViewMain);
 
         mWebView.setWebViewClient(mainWebClient);
@@ -205,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public void onPageFinished(WebView view, String url) {
             final WebView newView = view;
 
-
+            fastReload = !url.contains("transfer");
             newView.postDelayed(new Runnable() {
                 public void run() {
                     if (newView.getProgress() == 100) {
@@ -223,14 +228,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
         }
-
-
-        // here you execute an action when the URL you want is about to load
-        @Override
-        public void onLoadResource(WebView view, String url) {
-
-        }
-
 
     };
 
@@ -348,9 +345,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         ///////////////////TEST///////////////////
 
-        if (flg_logsd) {
-
-            Log.d("Remiscar -", "inside logtosdcard$$");
+        if (flg_logsdLOC) {
 
             String state = android.os.Environment.getExternalStorageState();
             if (!state.equals(android.os.Environment.MEDIA_MOUNTED)) {
@@ -512,9 +507,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private void getSingleLocation() {
         if (sharedPrefs != null) {
             Location singleLocation = locationHelper.getLastLocation();
-            sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
-            sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
+            saveLocationData(singleLocation);
         }
+    }
+
+    private void saveLocationData(Location singleLocation) {
+        sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
+        sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
+        String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
+        sharedPrefs.saveString("geopos", str);
+        Log.d("Remiscar ", "saveLocationData -" + str);
+        logLocationToSdcard("saveLocationData - " + str);
     }
 
     @Override
@@ -542,37 +545,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     //Obtener numero de imei
     private String getPhoneImei() {
+        String imei = "";
         TelephonyManager mTelephonyManager;
         mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
+        } else {
+            imei = mTelephonyManager.getDeviceId();
         }
-        return mTelephonyManager.getDeviceId();
+        Log.d("Remiscar ", " - set imei -" + imei);
+        return imei;
     }
 
 
     @Override
     public void onLocationChanged(Location location) {
-
-
-        String str = location.getLatitude() + "," + location.getLongitude();
-
-        Log.d("Remiscar ", " - set location -" + str);
-        logToSdcard("Remiscar ", " - set location -" + str);
-        logLocationToSdcard(" - set location -" + str);
-        lat = (Double) location.getLatitude();
-        lon = (Double) location.getLongitude();
-        ////////////////////TEST///////////
-        /*lat = -54.805006;
-        lon = -68.330199;
-        str = lat.toString()+","+lon.toString();*/
-        ////////////////////TEST///////////
-        geopos = str;
-        sharedPrefs.saveFloat("latmovil", lat.floatValue());
-        sharedPrefs.saveFloat("lonmovil", lon.floatValue());
-        sharedPrefs.saveString("geopos", str);
-
+        // metodo vacio.
+        // la localizacion se obtiene en getSingleLocation().
     }
 
     public void getMyLocationAddress() {
@@ -869,7 +859,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Subscribe()
     public void processMensaje(MensajeEvent data) {
         //reenvio a url de Mviajeshoy.php para actualizar datos de geopos.
-        setMainView();
 
         int success;
         JsonObject result = new JsonObject();
@@ -931,12 +920,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             Log.d("Remiscar -", "s- " + success);
             logToSdcard("Remiscar -", "s- " + success);
-            if(result.has("zona")){
-                int retZona = result.get("zona").getAsInt();
-                logLocationToSdcard(Integer.toString(retZona));
-                logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
-            }
-
 
             if (success == 0) {
                 Log.d("Remiscar -", "sin mensajes.");
@@ -989,15 +972,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Subscribe
     public void onPollingStep(PollingEvent event) {
+        if(fastReload){
+            processPollingStep();
+        }
+
+    }
+
+    @Subscribe
+    public void onMinutePollingStep(MinutePollingEvent event) {
+        if(!fastReload){
+            processPollingStep();
+        }
+    }
+
+    private void processPollingStep() {
         pa = 0;//reset boton de panico
         flg_origen = 0;
-        if (textNroMovil.getText().toString().equals("00")) {
+        if (textNroMovil.getText().toString().equals("00")
+                || textNroMovil.getText().toString().equals("")) {
             textNroMovil.setText(movil.toString());
         }
         if (movil.equals("")) {
             ServiceUtils.asValidarUsuario(mContext);
         }
-
+        getSingleLocation();
+        setMainView();
     }
 
     public void checkLocationService() {

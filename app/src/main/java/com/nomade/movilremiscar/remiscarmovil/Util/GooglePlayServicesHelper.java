@@ -33,8 +33,8 @@ public class GooglePlayServicesHelper implements GoogleApiClient.ConnectionCallb
      * https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest
      */
     public static int LOCATION_GPS_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
-    public static int LOCATION_GPS_INTERVAL_MILLIS = 30000;
-    public static int LOCATION_GPS_FASTEST_INTERVAL_MILLIS = 10000;
+    public static int LOCATION_GPS_INTERVAL_MILLIS = 10000;
+    public static int LOCATION_GPS_FASTEST_INTERVAL_MILLIS = 5000;
 
     private final GoogleApiClient mGoogleApiClient;
     private Set<LocationListener> locationListeners;

@@ -47,7 +47,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginStart="10dp"
-                            android:layout_toRightOf="@id/textMovilText"
+                            android:layout_toEndOf="@id/textMovilText"
                             android:text="00"
                             android:textStyle="bold"
                             android:textColor="#ff000fff"
