@@ -37,6 +37,8 @@ public class ServiceUtils {
     public static String url_main = base_url + "Mviajeshoy.php";
     private static String url_ubicacionViaje = base_url + "Mcoordenadas.php";
 
+    public static String GOOGLE_API_KEY = "AIzaSyCOv4VQqpgfbQ8CSbXZIc11ek6X5C_YO3Y";
+
     public static void asMensaje(Context context) {
 
         Ion.with(context)
