@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-import com.nomade.movilremiscar.remiscarmovil.events.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -19,12 +18,15 @@ public class PollingManager {
 
     Context mContext;
 
+    private int clearCacheCounter = 0;
     int flg_run = 0; // flag repeating task running
     //seteo de intervalo de actualizacion de datos
-    private final static int INTERVAL = 10000; // 10segundos
+    private final static int INTERVAL = 10 * 1000; // segundos /** 20 **/
     Handler mHandler;
     SharedPrefsUtil prefs;
+    int mProcessDelay = 0;
     int counter = 0;
+
     public PollingManager(Context context) {
         mContext = context;
         mHandler = new Handler();
@@ -57,7 +59,13 @@ public class PollingManager {
 
             // PERIODO 3 MINUTOS
             if (Utils.esMultiplo(counter, 18)) {
+
+//este es el metodo que carga el webview cada 3 minutos, si se desea hacerlo cada 5 por ejemplo,
+// se puede copiarel contenido del if adentro del if anterior PERIODO 5 MINUTOS
+
                 EventBus.getDefault().post(new MinutePollingEvent());
+
+
             }
 
             // PERIODO 20 SEGUNDOS
@@ -73,6 +81,7 @@ public class PollingManager {
             mHandler.postDelayed(mHandlerTask, INTERVAL);
         }
     };
+
 
     public void startRepeatingTask() {
         if (flg_run == 0) {

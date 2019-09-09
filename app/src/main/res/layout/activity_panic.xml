@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="100dp"
         android:background="#d5d9ea">
 
         <TextView
@@ -21,6 +21,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Control de mensajes de alerta."
+            android:layout_gravity="center_horizontal"
             android:id="@+id/textView7" />
 
         <Button
@@ -76,5 +77,5 @@
         android:id="@+id/buttonInicio"
         android:layout_alignParentBottom="true"
         android:layout_gravity="center_horizontal"
-        android:background="#4863a0" />
+        android:background="#01579B" />
 </RelativeLayout>

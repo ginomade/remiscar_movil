@@ -81,5 +81,5 @@
         android:id="@+id/buttonInicio"
         android:layout_alignParentBottom="true"
         android:layout_gravity="center_horizontal"
-        android:background="#4863a0" />
+        android:background="#01579B" />
 </RelativeLayout>

@@ -17,7 +17,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="#4863a0">
+            android:background="#01579B">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -70,6 +70,6 @@
             android:id="@+id/button"
             android:layout_gravity="center_horizontal"
             android:textColor="#ffffff"
-            android:background="#4863a0" />
+            android:background="#01579B" />
     </LinearLayout>
 </RelativeLayout>

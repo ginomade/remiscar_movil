@@ -22,6 +22,7 @@ public class NovedadesActivity extends Activity {
     private static final String URL = ServiceUtils.base_url + "Mnovedades.php";
     private static final String URL_venc = ServiceUtils.base_url + "Mvencimientos.php";
     private static final String URL_calles = ServiceUtils.base_url + "buscar.php";
+    //private static final String URL_tarifador = ServiceUtils.base_url + "MTarifador.php";
     private static final String URL_empresas = ServiceUtils.base_url + "Mempresas.php";
 
     Button buttonInicio, buttonVenc, buttonCalles, buttonEmpresas, buttonCamUsu;
@@ -47,8 +48,7 @@ public class NovedadesActivity extends Activity {
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true); // Enable Javascript.
         mWebView.setWebViewClient(yourWebClient);
-
-        webSettings.setAllowFileAccessFromFileURLs(true);
+        //webSettings.setAllowFileAccessFromFileURLs(true);
 
         mWebView.loadUrl(URL + params);
 
@@ -122,16 +122,12 @@ public class NovedadesActivity extends Activity {
         // you tell the webclient you want to catch when a url is about to load
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            //mWebView.loadUrl(url);
-            return true;
+            view.loadUrl(url);
+            return false;
         }
 
-        // here you execute an action when the URL you want is about to load
-        @Override
-        public void onLoadResource(WebView view, String url) {
-
-        }
     };
+
 
     public void hideBtns() {
         buttonCalles.setVisibility(View.GONE);

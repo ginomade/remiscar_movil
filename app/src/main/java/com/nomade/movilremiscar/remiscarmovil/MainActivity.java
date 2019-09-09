@@ -16,9 +16,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
@@ -33,9 +30,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.google.android.gms.location.LocationListener;
 import com.google.gson.JsonObject;
 import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.Util.PollingManager;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
@@ -45,7 +47,6 @@ import com.nomade.movilremiscar.remiscarmovil.events.CoordenadasViajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
-import com.nomade.movilremiscar.remiscarmovil.events.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
@@ -68,6 +69,7 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
+    private boolean fastReload = true;
     String t = "0"; //mensajes test
     private String imei, Direccion;
     String TAG_SUCCESS = "result";
@@ -80,9 +82,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     Double lat = 0.0;
     Double lon = 0.0;
 
-    private boolean fastReload = true;
-
-    Button buttonMap, buttonNov, buttonPanico;
+    Button buttonMap, Crono, buttonNov, buttonPanico;
     ImageButton reloadButton;
 
     String carlitos, carlibres, bahia, bahialibres, status, movil, geopos;
@@ -149,11 +149,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             try {
 
                 if (outfile == null) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-                    String currentDateandTime = sdf.format(new Date());
-                    outfile = File.createTempFile("remiscarLog_" + currentDateandTime + "_", ".txt", storageDir);
+                    outfile = File.createTempFile("remiscarLog", ".txt", storageDir);
                 }
             } catch (IOException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -170,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         ServiceUtils.asValidarUsuario(mContext);
 
-
         iniciarServicios();
 
     }
@@ -185,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private void setMainView() {
         String geoposLocal = sharedPrefs.getString("geopos", "");
-        logLocationToSdcard("setMainView - " + geoposLocal);
+       // logLocationToSdcard("setMainView - " + geoposLocal);
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
                 + "&geopos=" + geoposLocal;
@@ -197,7 +195,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     WebViewClient mainWebClient = new WebViewClient() {
-        // you tell the webclient you want to catch when a url is about to load
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.setScrollY(0);
@@ -210,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public void onPageFinished(WebView view, String url) {
             final WebView newView = view;
 
-            fastReload = !url.contains("transfer");
+            fastReload = !url.contains("transfer")&&!url.contains("McobrarMercadoPago")&&!url.contains("Mviajeshoyver")&&!url.contains("MTarifador")&&!url.contains("buscar")&&!url.contains("McobroTDF")&&!url.contains("McobrarTDF")&&!url.contains("ppago.php")&&!url.contains("ppago")&&!url.contains("rcar")&&!url.contains("http://arauvoip.dnsalias.net/rcar");
             newView.postDelayed(new Runnable() {
                 public void run() {
                     if (newView.getProgress() == 100) {
@@ -254,7 +251,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
 
         });
+        Crono = (Button) findViewById(R.id.Crono);
+        Crono.setOnClickListener(new View.OnClickListener() {
 
+            @Override
+            public void onClick(View arg0) {
+
+                Intent intent = new Intent(MainActivity.this, CronoActivity.class);
+                startActivity(intent);
+
+            }
+
+        });
         buttonNov = (Button) findViewById(R.id.buttonNov);
         buttonNov.setOnClickListener(new View.OnClickListener() {
 
@@ -340,57 +348,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-    public void logLocationToSdcard(String statement) {
-        // generacion de log en memoria sd del equipo
-
-        ///////////////////TEST///////////////////
-
-        if (flg_logsdLOC) {
-
-            String state = android.os.Environment.getExternalStorageState();
-            if (!state.equals(android.os.Environment.MEDIA_MOUNTED)) {
-                try {
-                    throw new IOException("SD Card is not mounted.  It is " + state + ".");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String currentDateandTime = sdf.format(new Date());
-
-
-            try {
-
-
-                try (FileOutputStream fOut = new FileOutputStream(outfile, true)) {
-                    OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-                    myOutWriter.append(currentDateandTime + " " + "LOC" + "     ");
-                    myOutWriter.append(statement);
-                    myOutWriter.append("\n");
-                    myOutWriter.flush();
-                    myOutWriter.close();
-                    fOut.close();
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-        }
-
-    }
-
     public void logToSdcard(String tag, String statement) {
         // generacion de log en memoria sd del equipo
 
         ///////////////////TEST///////////////////
 
-        if (flg_logsd) {
-
-            Log.d("Remiscar -", "inside logtosdcard$$");
+        if (flg_logsdLOC) {
 
             String state = android.os.Environment.getExternalStorageState();
             if (!state.equals(android.os.Environment.MEDIA_MOUNTED)) {
@@ -517,7 +480,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
         sharedPrefs.saveString("geopos", str);
         Log.d("Remiscar ", "saveLocationData -" + str);
-        logLocationToSdcard("saveLocationData - " + str);
+       // logLocationToSdcard("saveLocationData - " + str);
     }
 
     @Override
@@ -552,8 +515,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
         } else {
-            imei = mTelephonyManager.getDeviceId();
-        }
+        imei = mTelephonyManager.getDeviceId();
+    }
+
         Log.d("Remiscar ", " - set imei -" + imei);
         return imei;
     }
@@ -561,8 +525,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
+
+
         // metodo vacio.
+
         // la localizacion se obtiene en getSingleLocation().
+
     }
 
     public void getMyLocationAddress() {
@@ -714,6 +682,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     Double location_lon = location.getDouble("lng");
                     ObtCoordenadas = String.valueOf(location_lat) + "," + String.valueOf(location_lon);
                     sharedPrefs.saveString("latlonOrigen", ObtCoordenadas);
+                    sharedPrefs.saveString("geopos", ObtCoordenadas);
 
                     Log.d("REMISCAR - ", " ADDRESS OK-" + ObtCoordenadas);
                     logToSdcard("REMISCAR - ", " ADDRESS OK-" + ObtCoordenadas);
@@ -743,8 +712,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             Log.d("Remiscar* - ", "Login Response " + data.toString());
             logToSdcard("Remiscar - ", "Login Response " + data.toString());
             // check for success tag
-            //para TEST success = 1;
-            int success = data.get(TAG_SUCCESS).getAsInt();
+
+            int success = 1;//data.get(TAG_SUCCESS).getAsInt();
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
                     movil = data.get("movil").getAsString();
@@ -800,7 +769,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             JsonObject result = data.getObject();
             Log.d("Remiscar A- alerta r-", result.toString());
             logToSdcard("Remiscar - alerta r-", result.toString());
-            logLocationToSdcard("alertevent - " + sharedPrefs.getString("geopos", ""));
             //success = json.getInt(TAG_SUCCESS);
             //al_status, al_geopos, al_movil, al_fecha, al_ubicacion
 
@@ -880,8 +848,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 logToSdcard("Remiscar -", "sin mensajes.");
                 flg_mens = 0;
                 buttonNov.setText("NOVEDADES");
-                buttonNov.setBackgroundColor(Color.parseColor("#000000"));
-                buttonNov.setTextColor(Color.parseColor("#FDFC80"));
+                buttonNov.setBackgroundColor(Color.parseColor("#01579B"));
+                buttonNov.setTextColor(Color.parseColor("#d5d9ea"));
             } else if (success == 1) {
                 Log.d("Remiscar -", "HAY mensajes.");
                 logToSdcard("Remiscar -", "HAY mensajes.");
@@ -890,8 +858,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
                     mp.start();
                     buttonNov.setText("HAY MENSAJES");
-                    buttonNov.setBackgroundColor(Color.parseColor("#FDFC80"));
-                    buttonNov.setTextColor(Color.parseColor("#000000"));
+                    buttonNov.setBackgroundColor(Color.parseColor("#d5d9ea"));
+                    buttonNov.setTextColor(Color.parseColor("#01579B"));
                     flg_mens = 1;
                 } else {
 
@@ -977,7 +945,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
     }
-
     @Subscribe
     public void onMinutePollingStep(MinutePollingEvent event) {
         if(!fastReload){
@@ -998,6 +965,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         getSingleLocation();
         setMainView();
     }
+
 
     public void checkLocationService() {
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -1031,5 +999,4 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             });
             dialog.show();
         }
-    }
-}
+    }}

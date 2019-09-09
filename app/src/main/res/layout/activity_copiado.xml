@@ -27,7 +27,7 @@
             style="@style/ButtonText"
             android:id="@+id/buttonInicio"
             android:layout_alignParentBottom="true"
-            android:background="#4863a0" />
+            android:background="#01579B" />
 
     </LinearLayout>
 </RelativeLayout>

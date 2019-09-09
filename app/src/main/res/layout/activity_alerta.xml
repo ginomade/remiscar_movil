@@ -14,7 +14,7 @@
         android:text="Inicio"
         style="@style/ButtonText"
         android:id="@+id/buttonInicio"
-        android:background="#4863a0"
+        android:background="#01579B"
         android:layout_alignParentBottom="true"
         android:layout_weight="1"/>
 

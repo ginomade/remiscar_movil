@@ -11,13 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:background="#01579B">
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:background="#4863a0">
+            android:background="#01579B">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -25,7 +26,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="CALLES Y ZONAS"
                 android:id="@+id/textView"
-                android:textColor="#ffffff"
+                android:textColor="#d5d9ea"
                 android:layout_marginLeft="20dp"
                 android:textSize="20dp" />
         </FrameLayout>
@@ -44,7 +45,7 @@
             style="@style/ButtonText"
             android:id="@+id/buttonInicio"
             android:layout_alignParentBottom="true"
-            android:background="#4863a0" />
+            android:background="#01579B" />
 
     </LinearLayout>
 </RelativeLayout>

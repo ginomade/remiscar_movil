@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nomade.movilremiscar.remiscarmovil" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.nomade.movilremiscar.remiscarmovil">
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -18,15 +19,18 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:usesCleartextTraffic="true"
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
         </activity>
         <activity
             android:name=".SplashActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,63 +46,77 @@
         <!-- Google MAP API key -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyBZsub9dRqt2nJXZrSBzLRpFh4e0iK7XAE" />
+            android:value="AIzaSyCKBR3GAk_m3_Ub3VCDx8MTVucs2acq0-4" />
 
         <activity
             android:name=".NovedadesActivity"
-            android:label="@string/title_activity_novedades">
+            android:label="@string/title_activity_novedades"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".CamUsuActivity"
-            android:label="@string/title_activity_camusu">
+            android:label="@string/title_activity_camusu"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".ViajesActivity"
-            android:label="@string/title_activity_viajes">
+            android:label="@string/title_activity_viajes"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".ZonasActivity"
-            android:label="@string/title_activity_zonas">
+            android:label="@string/title_activity_zonas"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings">
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".PropActivity"
-            android:label="@string/title_activity_prop">
+            android:label="@string/title_activity_prop"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".CobrarActivity"
-            android:label="@string/title_activity_cobrar">
+            android:label="@string/title_activity_cobrar"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".PanicActivity"
-            android:label="@string/title_activity_panic">
+            android:label="@string/title_activity_panic"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".AlertaActivity"
-            android:label="@string/title_activity_alerta">
+            android:label="@string/title_activity_alerta"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".CronoActivity"
             android:label="@string/title_activity_crono"
-            android:configChanges="orientation|screenSize">
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".CallesActivity"
             android:label="@string/title_activity_calles"
-            android:configChanges="orientation|screenSize">
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".TarifadorActivity"
+            android:label="@string/title_activity_tarifador"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".VencimientosActivity"
             android:label="@string/title_activity_vencimientos"
-            android:configChanges="orientation|screenSize">
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".CopiadoActivity"
             android:label="@string/title_activity_copiado"
-            android:configChanges="orientation|screenSize">
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

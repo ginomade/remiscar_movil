@@ -7,7 +7,7 @@
     <style name="ButtonText">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">#d5d9ea</item>
         <item name="android:gravity">center</item>
         <item name="android:layout_margin">3dp</item>
         <item name="android:textStyle">normal</item>
@@ -16,7 +16,7 @@
         <item name="android:shadowDx">1</item>
         <item name="android:shadowDy">1</item>
         <item name="android:shadowRadius">5</item>
-        <item name="android:background">#0288D1</item>
+        <item name="android:background">#01579B</item>
     </style>
     <string name="title_activity_map">MapActivity</string>
     <string name="title_activity_novedades">NovedadesActivity</string>
@@ -24,6 +24,7 @@
     <string name="title_activity_viajes">ViajesActivity</string>
     <string name="title_activity_zonas">ZonasActivity</string>
     <string name="title_activity_calles">CallesActivity</string>
+    <string name="title_activity_tarifador">TarifadorActivity</string>
     <string name="title_activity_vencimientos">VencimientosActivity</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_prop">PropActivity</string>

@@ -7,19 +7,19 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
@@ -138,19 +138,19 @@ public class ViajesActivity extends AppCompatActivity implements LocationListene
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1500, 10, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
         if (pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1500, 10, this);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
                 Log.d("Remiscar -", " GPS conectado");
             } else {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1500, 10, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
                 Toast.makeText(this, "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
                 Log.d("Remiscar -", " NETWORK over GPS");
             }
 
         } else {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1500, 10, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
             Log.d("Remiscar -", " NETWORK conectado");
 
         }

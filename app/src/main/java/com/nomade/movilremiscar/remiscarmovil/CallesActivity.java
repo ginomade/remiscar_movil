@@ -1,5 +1,6 @@
 package com.nomade.movilremiscar.remiscarmovil;
 
+
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -62,7 +63,7 @@ public class CallesActivity extends Activity {
         // you tell the webclient you want to catch when a url is about to load
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            //mWebView.loadUrl(url);
+            mWebView.loadUrl(url);
             return true;
         }
 

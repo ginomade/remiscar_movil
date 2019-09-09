@@ -242,4 +242,5 @@ public class AlertaActivity extends Activity implements OnMapReadyCallback {
         //-34.935506,-57.9556878
         Marker TP = googleMap.addMarker(new MarkerOptions().position(Inicio).title("Movil"));
     }
+
 }

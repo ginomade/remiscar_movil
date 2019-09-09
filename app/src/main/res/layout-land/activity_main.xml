@@ -19,7 +19,7 @@
             android:paddingStart="10dp"
             android:text="Remiscar Movil"
             android:textColor="#ffffff"
-            android:background="#0288D1"
+            android:background="#01579B"
             android:textSize="16dp" />
 
         <LinearLayout
@@ -71,7 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:background="#0288D1"
+                    android:background="#01579B"
                     android:text="MAPA" />
 
                 <ImageButton
@@ -80,7 +80,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:background="#0288D1"
+                    android:background="#01579B"
                     android:src="@drawable/ic_autorenew_white_24dp" />
 
 
@@ -153,7 +153,7 @@
                 android:text="NOVEDADES"
                 android:id="@+id/buttonNov"
                 android:layout_weight="1"
-                android:background="#0288D1" />
+                android:background="#01579B" />
         </LinearLayout>
     </LinearLayout>
 

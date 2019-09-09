@@ -33,27 +33,30 @@
             android:layout_weight="1">
 
             <Button
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Vencimientos"
-                android:textSize="20dp"
-                style="@style/ButtonText"
                 android:id="@+id/buttonVenc"
-                android:background="#0288D1" />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Calles"
                 style="@style/ButtonText"
-                android:id="@+id/buttonCalles"
-                android:background="#0288D1" />
-            <Button
-                android:layout_width="match_parent"
+                android:layout_width="225dp"
                 android:layout_height="40dp"
-                android:text="Empresas"
-                style="@style/ButtonText"
+                android:layout_weight="0.99"
+                android:background="#01579B"
+                android:text="Vencimientos"
+                android:textSize="18dp" />
+
+            <Button
                 android:id="@+id/buttonEmpresas"
-                android:background="#0288D1" />
+                style="@style/ButtonText"
+                android:layout_width="115dp"
+                android:layout_height="40dp"
+                android:background="#01579B"
+                android:text="Empresas" />
+
+            <Button
+                android:id="@+id/buttonCalles"
+                style="@style/ButtonText"
+                android:layout_width="90dp"
+                android:layout_height="40dp"
+                android:background="#01579B"
+                android:text="Tarifa" />
         </LinearLayout>
         </ScrollView>
         <LinearLayout
@@ -65,19 +68,19 @@
 
             <Button
                 android:layout_width="wrap_content"
-                android:layout_height="35dp"
+                android:layout_height="40dp"
                 android:text="Volver"
                 style="@style/ButtonText"
                 android:id="@+id/buttonInicio"
-                android:background="#0288D1"
+                android:background="#01579B"
                 android:layout_weight="1.03" />
             <Button
                 android:layout_width="192dp"
-                android:layout_height="35dp"
+                android:layout_height="40dp"
                 android:text="Cambio Movil"
                 style="@style/ButtonText"
                 android:id="@+id/buttonCamUsu"
-                android:background="#0288D1" />
+                android:background="#01579B" />
         </LinearLayout>
     </LinearLayout>
 

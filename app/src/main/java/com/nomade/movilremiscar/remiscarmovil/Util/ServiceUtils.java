@@ -37,8 +37,6 @@ public class ServiceUtils {
     public static String url_main = base_url + "Mviajeshoy.php";
     private static String url_ubicacionViaje = base_url + "Mcoordenadas.php";
 
-    public static String GOOGLE_API_KEY = "AIzaSyCOv4VQqpgfbQ8CSbXZIc11ek6X5C_YO3Y";
-
     public static void asMensaje(Context context) {
 
         Ion.with(context)
@@ -185,10 +183,7 @@ public class ServiceUtils {
                                String direccion) {
         String geoposLocal = SharedPrefsUtil.getInstance(context).getString("geopos", "");
         String url_params = url_alerta + "?IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
-                "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
-                + "&Ubicacion=" + direccion
-                + "&GeoPos=" + geoposLocal;
-        Log.d("Remiscar* ", "asAlert. LOC - " + url_params);
+                "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") + "&Ubicacion=" + direccion + "&GeoPos=" + geoposLocal;Log.d("Remiscar* ", "asAlert. LOC - " + url_params);
         Ion.with(context)
                 .load(url_params)
                 .asJsonObject()
@@ -234,7 +229,7 @@ public class ServiceUtils {
     public static void asLocation(Context context, String url_location) {
         Ion.with(context)
                 .load(url_location)
-                .setBodyParameter("key", "AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw")//AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw
+                .setBodyParameter("key", "AIzaSyCKBR3GAk_m3_Ub3VCDx8MTVucs2acq0-4")//AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
