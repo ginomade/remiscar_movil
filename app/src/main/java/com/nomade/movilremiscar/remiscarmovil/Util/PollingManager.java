@@ -71,10 +71,12 @@ public class PollingManager {
             // PERIODO 20 SEGUNDOS
             if (Utils.esMultiplo(counter, 2)) {
                 EventBus.getDefault().post(new PollingEvent());
+                ServiceUtils.asAuto(mContext);
+                ServiceUtils.checkPuntero(mContext);
             }
 
             //RESET COUNTER
-            if(counter > 360) {
+            if (counter > 360) {
                 counter = 0;
             }
 

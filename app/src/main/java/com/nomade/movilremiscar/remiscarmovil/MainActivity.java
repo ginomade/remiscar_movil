@@ -49,6 +49,7 @@ import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ValidacionEvent;
 
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public int pa = 0;// flag para boton de panico
     int flg_mens = 0; // flag para mensajes
     int flg_mens_auto = 0;
+    int flg_puntero = 0;
     Double lat = 0.0;
     Double lon = 0.0;
 
@@ -183,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private void setMainView() {
         String geoposLocal = sharedPrefs.getString("geopos", "");
-       // logLocationToSdcard("setMainView - " + geoposLocal);
+        // logLocationToSdcard("setMainView - " + geoposLocal);
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
                 + "&geopos=" + geoposLocal;
@@ -207,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public void onPageFinished(WebView view, String url) {
             final WebView newView = view;
 
-            fastReload = !url.contains("transfer")&&!url.contains("McobrarMercadoPago")&&!url.contains("Mviajeshoyver")&&!url.contains("MTarifador")&&!url.contains("buscar")&&!url.contains("McobroTDF")&&!url.contains("McobrarTDF")&&!url.contains("ppago.php")&&!url.contains("ppago")&&!url.contains("rcar")&&!url.contains("http://arauvoip.dnsalias.net/rcar");
+            fastReload = !url.contains("transfer") && !url.contains("McobrarMercadoPago") && !url.contains("Mviajeshoyver") && !url.contains("MTarifador") && !url.contains("buscar") && !url.contains("McobroTDF") && !url.contains("McobrarTDF") && !url.contains("ppago.php") && !url.contains("ppago") && !url.contains("rcar") && !url.contains("http://arauvoip.dnsalias.net/rcar");
             newView.postDelayed(new Runnable() {
                 public void run() {
                     if (newView.getProgress() == 100) {
@@ -480,7 +482,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
         sharedPrefs.saveString("geopos", str);
         Log.d("Remiscar ", "saveLocationData -" + str);
-       // logLocationToSdcard("saveLocationData - " + str);
+        // logLocationToSdcard("saveLocationData - " + str);
     }
 
     @Override
@@ -515,8 +517,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
         } else {
-        imei = mTelephonyManager.getDeviceId();
-    }
+            imei = mTelephonyManager.getDeviceId();
+        }
 
         Log.d("Remiscar ", " - set imei -" + imei);
         return imei;
@@ -912,6 +914,46 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+    @Subscribe()
+    public void processPuntero(PunteroEvent data) {
+        int success;
+        JsonObject result = new JsonObject();
+        result = data.getObject();
+        Log.d("Remiscar", "PunteroEvent:" + imei + "-" + movil);
+        logToSdcard("Remiscar", "PunteroEvent:" + imei + "-" + movil);
+
+        // check for success tag
+        try {
+            Log.d("Remiscar - Puntero r-", result.toString());
+            logToSdcard("Remiscar - PunteroEvent r-", result.toString());
+            success = result.get(TAG_SUCCESS).getAsInt();
+
+            Log.d("Remiscar -", "s- " + success);
+            logToSdcard("Remiscar -", "s- " + success);
+
+            if (success == 0) {
+                Log.d("Remiscar -", "sin mensajes.");
+                logToSdcard("Remiscar -", "sin mensajes.");
+                flg_puntero = 0;
+            } else if (success == 1) {
+                Log.d("Remiscar -", "PunteroEvent.");
+                logToSdcard("Remiscar -", "PunteroEvent.");
+                if (flg_puntero == 0) {
+                    Toast.makeText(mContext, "PunteroEvent.", Toast.LENGTH_SHORT).show();
+                    final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
+                    mp.start();
+                    flg_puntero = 1;
+                } else {
+
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void processPanic(PanicEvent data) {
         JsonObject result = new JsonObject();
@@ -940,14 +982,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Subscribe
     public void onPollingStep(PollingEvent event) {
-        if(fastReload){
+        if (fastReload) {
             processPollingStep();
         }
 
     }
+
     @Subscribe
     public void onMinutePollingStep(MinutePollingEvent event) {
-        if(!fastReload){
+        if (!fastReload) {
             processPollingStep();
         }
     }
@@ -999,4 +1042,5 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             });
             dialog.show();
         }
-    }}
+    }
+}

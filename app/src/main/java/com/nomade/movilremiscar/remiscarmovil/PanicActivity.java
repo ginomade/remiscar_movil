@@ -75,7 +75,7 @@ public class PanicActivity extends Activity implements LocationListener {
             public void onClick(View arg0) {
                 if ("".equals(geopos)) {
                     Toast.makeText(PanicActivity.this, "Localizacion no detectada. Vuelva a intentar.", Toast.LENGTH_LONG).show();
-                }else{
+                } else {
 
                     Toast.makeText(PanicActivity.this, "PRUEBA de alerta enviada.", Toast.LENGTH_LONG).show();
                     prueba.setBackgroundColor(Color.parseColor("#326166"));
@@ -91,7 +91,7 @@ public class PanicActivity extends Activity implements LocationListener {
             public void onClick(View arg0) {
                 if ("".equals(geopos)) {
                     Toast.makeText(PanicActivity.this, "Localizacion no detectada. Vuelva a intentar.", Toast.LENGTH_LONG).show();
-                }else{
+                } else {
 
                     Log.d("Remiscar*", "-LOCATION-" + latmovil + " - " + lonmovil);
                     processAlert("ALERTA");

@@ -25,7 +25,6 @@ public class SharedPrefsUtil {
     }
 
 
-
     public void saveString(String key, String value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString(key, value);
