@@ -201,6 +201,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.setScrollY(0);
             mWebView.loadUrl(url);
+            if(url.contains("libres")){
+                mWebView.setClickable(false);
+            }
 
             return true;
         }
@@ -208,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         @Override
         public void onPageFinished(WebView view, String url) {
             final WebView newView = view;
-
+            mWebView.setClickable(true);
             fastReload = !url.contains("transfer") && !url.contains("McobrarMercadoPago") && !url.contains("Mviajeshoyver") && !url.contains("MTarifador") && !url.contains("buscar") && !url.contains("McobroTDF") && !url.contains("McobrarTDF") && !url.contains("ppago.php") && !url.contains("ppago") && !url.contains("rcar") && !url.contains("http://arauvoip.dnsalias.net/rcar");
             newView.postDelayed(new Runnable() {
                 public void run() {
