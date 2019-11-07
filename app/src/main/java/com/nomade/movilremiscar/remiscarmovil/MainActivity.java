@@ -210,12 +210,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.setScrollY(0);
-            mWebView.loadUrl(url);
             //bloqueo del click en el webview
-            if (url.contains("McobroTDF")) {
+            if (url.contains("cobro")) {
                 mWebView.setClickable(false);
+                mWebView.loadUrl("about:blank");
             }
 
+            mWebView.loadUrl(url);
             return true;
         }
 
