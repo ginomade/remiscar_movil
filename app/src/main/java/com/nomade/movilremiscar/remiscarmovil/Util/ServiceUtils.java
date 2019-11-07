@@ -205,8 +205,12 @@ public class ServiceUtils {
     public static void asAlert(Context context,
                                String direccion) {
         String geoposLocal = SharedPrefsUtil.getInstance(context).getString("geopos", "");
-        String url_params = url_alerta + "?IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
-                "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") + "&Ubicacion=" + direccion + "&GeoPos=" + geoposLocal;
+        String url_params = url_alerta + "?IMEI="
+                + SharedPrefsUtil.getInstance(context).getString("imei", "")
+                + "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
+                + "&Ubicacion=" + direccion
+                + "&movil_al="
+                + "&GeoPos=" + geoposLocal;
         Log.d("Remiscar* ", "asAlert. LOC - " + url_params);
         Ion.with(context)
                 .load(url_params)

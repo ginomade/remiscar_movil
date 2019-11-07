@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.0'
 
     defaultConfig {
         applicationId "com.nomade.movilremiscar.remiscarmovil"
         minSdkVersion 19
-        targetSdkVersion 28
-        versionCode 21
+        targetSdkVersion 29
+        versionCode 22
         versionName "2.8"
         multiDexEnabled true
     }
@@ -22,10 +22,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.google.android.gms:play-services-maps:16.1.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.koushikdutta.ion:ion:2.+'
     implementation 'org.greenrobot:eventbus:3.1.1'

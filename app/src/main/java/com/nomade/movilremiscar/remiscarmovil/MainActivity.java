@@ -22,6 +22,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -184,16 +187,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void setMainView() {
+        mWebView = (WebView) findViewById(R.id.webViewMain);
+
+        mWebView.setWebViewClient(mainWebClient);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setAppCacheEnabled(true);
+        mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+
+        loadWebViewDdata();
+    }
+
+    private void loadWebViewDdata() {
         String geoposLocal = sharedPrefs.getString("geopos", "");
         // logLocationToSdcard("setMainView - " + geoposLocal);
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
                 + "&geopos=" + geoposLocal;
-        mWebView = (WebView) findViewById(R.id.webViewMain);
-
-        mWebView.setWebViewClient(mainWebClient);
         mWebView.loadUrl(finalUrl);
-
     }
 
     WebViewClient mainWebClient = new WebViewClient() {
@@ -201,7 +211,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.setScrollY(0);
             mWebView.loadUrl(url);
-            if(url.contains("libres")){
+            //bloqueo del click en el webview
+            if (url.contains("McobroTDF")) {
                 mWebView.setClickable(false);
             }
 
@@ -211,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         @Override
         public void onPageFinished(WebView view, String url) {
             final WebView newView = view;
+            //bloqueo del click en el webview
             mWebView.setClickable(true);
             fastReload = !url.contains("transfer") && !url.contains("McobrarMercadoPago") && !url.contains("Mviajeshoyver") && !url.contains("MTarifador") && !url.contains("buscar") && !url.contains("McobroTDF") && !url.contains("McobrarTDF") && !url.contains("ppago.php") && !url.contains("ppago") && !url.contains("rcar") && !url.contains("http://arauvoip.dnsalias.net/rcar");
             newView.postDelayed(new Runnable() {
@@ -231,6 +243,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         }
 
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+            try {
+                view.stopLoading();
+            } catch (Exception e) {
+            }
+
+            if (view.canGoBack()) {
+                view.goBack();
+            }
+
+            try {
+                Thread.sleep(2000);
+                loadWebViewDdata();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            super.onReceivedError(view, request, error);
+        }
     };
 
     private void initializeUI() {
@@ -240,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setMainView();
+                loadWebViewDdata();
             }
         });
 
