@@ -1,6 +1,8 @@
 package com.nomade.movilremiscar.remiscarmovil.Util;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
@@ -229,10 +231,25 @@ public class ServiceUtils {
                 });
     }
 
+    public static String getVersionName(Context context){
+        String version = "";
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            version = pInfo.versionName;
+            int versionCode = pInfo.versionCode;
+            Log.d("Remiscar", "Version Name : "+version + "\n Version Code : "+versionCode);
+        } catch(PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            Log.d("Remiscar", "PackageManager Catch : "+e.toString());
+        }
+        return version;
+    }
+
     public static void asValidarUsuario(Context context) {
         Ion.with(context)
                 .load(url_validacion)
                 .setBodyParameter("IMEI", SharedPrefsUtil.getInstance(context).getString("imei", ""))
+                .setBodyParameter("version", getVersionName(context))
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
