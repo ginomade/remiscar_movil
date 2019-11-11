@@ -40,6 +40,7 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.gms.location.LocationListener;
 import com.google.gson.JsonObject;
 import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.LollipopFixedWebView;
 import com.nomade.movilremiscar.remiscarmovil.Util.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.Util.PollingManager;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     File outfile = null;
 
-    WebView mWebView;
+    LollipopFixedWebView mWebView;
 
     /////////////TEST/////////////
     // setear a true para generar el log en memoria sd del equipo.
@@ -187,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void setMainView() {
-        mWebView = (WebView) findViewById(R.id.webViewMain);
+        mWebView = (LollipopFixedWebView) findViewById(R.id.webViewMain);
 
         mWebView.setWebViewClient(mainWebClient);
         mWebView.getSettings().setJavaScriptEnabled(true);

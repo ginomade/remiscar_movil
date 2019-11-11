@@ -115,7 +115,7 @@
                         android:textSize="30dp"
                         android:textStyle="bold" />
                 </FrameLayout>
-                <WebView
+                <com.nomade.movilremiscar.remiscarmovil.Util.LollipopFixedWebView
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:id="@+id/webViewMain"
