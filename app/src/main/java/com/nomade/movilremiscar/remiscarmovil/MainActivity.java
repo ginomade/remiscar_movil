@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,11 +32,18 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.tasks.Task;
 import com.google.gson.JsonObject;
 import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
 import com.nomade.movilremiscar.remiscarmovil.Util.LollipopFixedWebView;
@@ -124,6 +130,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     PollingManager pollingManager;
 
+    GoogleSignInClient mGoogleSignInClient;
+
+    static final int RC_SIGN_IN = 1122;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -173,10 +183,50 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
-        ServiceUtils.asValidarUsuario(mContext);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
 
         iniciarServicios();
 
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case RC_SIGN_IN:
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                handleSignInResult(task);
+
+                break;
+        }
+
+    }
+
+    private void signIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            if (account != null) {
+                imei = account.getEmail();
+                sharedPrefs.saveString("imei", imei);
+                ServiceUtils.asValidarUsuario(mContext);
+            }
+
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Toast.makeText(MainActivity.this, "Error en registro de usuario.", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -266,6 +316,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             super.onReceivedError(view, request, error);
         }
     };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        if (account != null) {
+            imei = account.getEmail();
+            sharedPrefs.saveString("imei", imei);
+            ServiceUtils.asValidarUsuario(mContext);
+        } else {
+            signIn();
+        }
+    }
 
     private void initializeUI() {
         frmStatusLoc = (FrameLayout) findViewById(R.id.frmStatusLoc);
@@ -440,8 +504,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Origen = "";
         ZonaDestino = "";
         movil = "";
-        imei = getPhoneImei();
-        //imei = "359015062458232";//TEST/////
         SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
         settings.saveFloat("latmovil", 0);
         settings.saveFloat("lonmovil", 0);
@@ -449,7 +511,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         settings.saveString("Traslados", "");
         settings.saveString("latlonOrigen", "");
         settings.saveString("movil", "");
-        settings.saveString("imei", imei);
         settings.saveString("al_status", "");
         settings.saveString("al_fecha", "");
         settings.saveString("al_geopos", "");
@@ -543,24 +604,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         return super.onOptionsItemSelected(item);
     }
-
-
-    //Obtener numero de imei
-    private String getPhoneImei() {
-        String imei = "";
-        TelephonyManager mTelephonyManager;
-        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-
-        } else {
-            imei = mTelephonyManager.getDeviceId();
-        }
-
-        Log.d("Remiscar ", " - set imei -" + imei);
-        return imei;
-    }
-
 
     @Override
     public void onLocationChanged(Location location) {
