@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -189,10 +188,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        ServiceUtils.asValidarUsuario(mContext);
 
         iniciarServicios();
-
 
 
     }
@@ -201,12 +198,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
+        switch (requestCode) {
+            case RC_SIGN_IN:
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                handleSignInResult(task);
 
+                break;
         }
 
     }
@@ -219,13 +216,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-
-            // Signed in successfully, show authenticated UI.
+            if (account != null) {
+                imei = account.getEmail();
+                sharedPrefs.saveString("imei", imei);
+                ServiceUtils.asValidarUsuario(mContext);
+            }
 
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
-
+            Toast.makeText(MainActivity.this, "Error en registro de usuario.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -317,6 +317,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     };
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        if (account != null) {
+            imei = account.getEmail();
+            sharedPrefs.saveString("imei", imei);
+            ServiceUtils.asValidarUsuario(mContext);
+        } else {
+            signIn();
+        }
+    }
+
     private void initializeUI() {
         frmStatusLoc = (FrameLayout) findViewById(R.id.frmStatusLoc);
 
@@ -334,10 +348,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             @Override
             public void onClick(View arg0) {
 
-                /*Intent intent = new Intent(MainActivity.this, MapActivity.class);
-                startActivity(intent);*/
-
-                signIn();
+                Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                startActivity(intent);
 
             }
 
@@ -492,8 +504,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Origen = "";
         ZonaDestino = "";
         movil = "";
-        imei = getPhoneImei();
-        //imei = "359015062458232";//TEST/////
         SharedPrefsUtil settings = SharedPrefsUtil.getInstance(mContext);
         settings.saveFloat("latmovil", 0);
         settings.saveFloat("lonmovil", 0);
@@ -501,7 +511,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         settings.saveString("Traslados", "");
         settings.saveString("latlonOrigen", "");
         settings.saveString("movil", "");
-        settings.saveString("imei", imei);
         settings.saveString("al_status", "");
         settings.saveString("al_fecha", "");
         settings.saveString("al_geopos", "");
@@ -595,24 +604,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         return super.onOptionsItemSelected(item);
     }
-
-
-    //Obtener numero de imei
-    private String getPhoneImei() {
-        String imei = "";
-        TelephonyManager mTelephonyManager;
-        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-
-        } else {
-            imei = mTelephonyManager.getDeviceId();
-        }
-
-        Log.d("Remiscar ", " - set imei -" + imei);
-        return imei;
-    }
-
 
     @Override
     public void onLocationChanged(Location location) {
