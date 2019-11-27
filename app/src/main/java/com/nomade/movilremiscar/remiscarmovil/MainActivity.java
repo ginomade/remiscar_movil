@@ -220,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 imei = account.getEmail();
                 sharedPrefs.saveString("imei", imei);
                 ServiceUtils.asValidarUsuario(mContext);
+                loadWebViewDdata();
             }
 
         } catch (ApiException e) {
@@ -326,6 +327,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             imei = account.getEmail();
             sharedPrefs.saveString("imei", imei);
             ServiceUtils.asValidarUsuario(mContext);
+            loadWebViewDdata();
         } else {
             signIn();
         }
