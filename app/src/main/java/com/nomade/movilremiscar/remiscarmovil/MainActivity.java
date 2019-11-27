@@ -221,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 sharedPrefs.saveString("imei", imei);
                 ServiceUtils.asValidarUsuario(mContext);
                 loadWebViewDdata();
+                getSingleLocation();
             }
 
         } catch (ApiException e) {
@@ -797,7 +798,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             logToSdcard("Remiscar - ", "Login Response " + data.toString());
             // check for success tag
 
-            int success = 1;//data.get(TAG_SUCCESS).getAsInt();
+            int success = data.get(TAG_SUCCESS).getAsInt();
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
                     movil = data.get("movil").getAsString();
