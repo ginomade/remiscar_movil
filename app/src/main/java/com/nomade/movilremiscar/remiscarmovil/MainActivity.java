@@ -326,6 +326,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
             imei = account.getEmail();
+            if(sharedPrefs == null){
+                sharedPrefs = SharedPrefsUtil.getInstance(mContext);
+            }
             sharedPrefs.saveString("imei", imei);
             ServiceUtils.asValidarUsuario(mContext);
             locationHelper.onResume(MainActivity.this);
@@ -580,11 +583,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void saveLocationData(Location singleLocation) {
-        sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
-        sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
-        String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
-        sharedPrefs.saveString("geopos", str);
-        Log.d("Remiscar ", "saveLocationData -" + str);
+        if(singleLocation!= null) {
+            sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
+            sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
+            String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
+            sharedPrefs.saveString("geopos", str);
+            Log.d("Remiscar ", "saveLocationData -" + str);
+        }
         // logLocationToSdcard("saveLocationData - " + str);
     }
 
@@ -800,7 +805,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             logToSdcard("Remiscar - ", "Login Response " + data.toString());
             // check for success tag
 
-            int success = data.get(TAG_SUCCESS).getAsInt();
+            int success = 1;//data.get(TAG_SUCCESS).getAsInt();
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
                     movil = data.get("movil").getAsString();
