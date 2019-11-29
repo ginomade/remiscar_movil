@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     TextView textNroMovil;
 
 
+    private boolean firstDataLoad = true;
     File outfile = null;
 
     LollipopFixedWebView mWebView;
@@ -326,14 +327,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
             imei = account.getEmail();
-            if(sharedPrefs == null){
+            if (sharedPrefs == null) {
                 sharedPrefs = SharedPrefsUtil.getInstance(mContext);
             }
             sharedPrefs.saveString("imei", imei);
             ServiceUtils.asValidarUsuario(mContext);
             locationHelper.onResume(MainActivity.this);
-            getSingleLocation();
-            loadWebViewDdata();
+
+
         } else {
             signIn();
         }
@@ -573,17 +574,29 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         locationHelper.onResume(MainActivity.this);
         pollingManager.startRepeatingTask();
 
+        loadInitialData();
+    }
+
+    private void loadInitialData() {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        getSingleLocation();
+        loadWebViewDdata();
     }
 
     private void getSingleLocation() {
         if (sharedPrefs != null) {
             Location singleLocation = locationHelper.getLastLocation();
             saveLocationData(singleLocation);
+
         }
     }
 
     private void saveLocationData(Location singleLocation) {
-        if(singleLocation!= null) {
+        if (singleLocation != null) {
             sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
             sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
             String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
@@ -618,10 +631,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onLocationChanged(Location location) {
 
-
-        // metodo vacio.
-
-        // la localizacion se obtiene en getSingleLocation().
+        if (firstDataLoad) {
+            firstDataLoad = false;
+            loadInitialData();
+        }
 
     }
 
