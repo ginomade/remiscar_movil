@@ -255,6 +255,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
                 + "&geopos=" + geoposLocal;
+        Log.d("Remiscar ", "webview - " + finalUrl);
         mWebView.loadUrl(finalUrl);
     }
 
@@ -327,10 +328,27 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             imei = account.getEmail();
             sharedPrefs.saveString("imei", imei);
             ServiceUtils.asValidarUsuario(mContext);
-            loadWebViewDdata();
+
         } else {
             signIn();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pollingManager.stopRepeatingTask();
+        locationHelper.onPause();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+        locationHelper.onResume(MainActivity.this);
+        pollingManager.startRepeatingTask();
+        loadWebViewDdata();
     }
 
     private void initializeUI() {
@@ -552,22 +570,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        pollingManager.stopRepeatingTask();
-        locationHelper.onPause();
-        EventBus.getDefault().unregister(this);
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        EventBus.getDefault().register(this);
-        locationHelper.onResume(MainActivity.this);
-        pollingManager.startRepeatingTask();
-
-    }
 
     private void getSingleLocation() {
         if (sharedPrefs != null) {
@@ -797,7 +800,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             logToSdcard("Remiscar - ", "Login Response " + data.toString());
             // check for success tag
 
-            int success = 1;//data.get(TAG_SUCCESS).getAsInt();
+            int success = data.get(TAG_SUCCESS).getAsInt();
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
                     movil = data.get("movil").getAsString();
@@ -819,6 +822,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 sharedPrefs.saveString("imei", imei);
 
                 pollingManager.startRepeatingTask();
+
+                loadWebViewDdata();
 
 
             } else if (success == 0) {
