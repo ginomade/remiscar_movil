@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     TextView textNroMovil;
 
-
+    private boolean firstDataLoad = true;
     File outfile = null;
 
     LollipopFixedWebView mWebView;
@@ -348,6 +348,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         EventBus.getDefault().register(this);
         locationHelper.onResume(MainActivity.this);
         pollingManager.startRepeatingTask();
+        getSingleLocation();
         loadWebViewDdata();
     }
 
@@ -569,23 +570,30 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-
-
-
     private void getSingleLocation() {
         if (sharedPrefs != null) {
             Location singleLocation = locationHelper.getLastLocation();
-            saveLocationData(singleLocation);
+            if (singleLocation != null) {
+                saveLocationData(singleLocation);
+            } else {
+                try {
+                    Thread.sleep(1000);
+                    locationHelper.getLastLocation();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     private void saveLocationData(Location singleLocation) {
+
         sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
         sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
         String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
         sharedPrefs.saveString("geopos", str);
         Log.d("Remiscar ", "saveLocationData -" + str);
-        // logLocationToSdcard("saveLocationData - " + str);
+
     }
 
     @Override
@@ -613,10 +621,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onLocationChanged(Location location) {
 
-
-        // metodo vacio.
-
-        // la localizacion se obtiene en getSingleLocation().
+        saveLocationData(location);
+        loadWebViewDdata();
 
     }
 
