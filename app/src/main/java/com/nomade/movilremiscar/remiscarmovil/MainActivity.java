@@ -326,6 +326,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
             imei = account.getEmail();
+            if (sharedPrefs == null) {
+                sharedPrefs = SharedPrefsUtil.getInstance(mContext);
+            }
             sharedPrefs.saveString("imei", imei);
             ServiceUtils.asValidarUsuario(mContext);
 
