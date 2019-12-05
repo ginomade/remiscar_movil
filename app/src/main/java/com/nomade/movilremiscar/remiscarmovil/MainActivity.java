@@ -263,11 +263,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.setScrollY(0);
-            //bloqueo del click en el webview
-            if (url.contains("cobro")) {
-                mWebView.setClickable(false);
-                mWebView.loadUrl("about:blank");
-            }
 
             mWebView.loadUrl(url);
             return true;
@@ -275,25 +270,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            final WebView newView = view;
             //bloqueo del click en el webview
             mWebView.setClickable(true);
-            fastReload = !url.contains("transfer") && !url.contains("McobrarMercadoPago") && !url.contains("Mviajeshoyver") && !url.contains("MTarifador") && !url.contains("buscar") && !url.contains("McobroTDF") && !url.contains("McobrarTDF") && !url.contains("ppago.php") && !url.contains("ppago") && !url.contains("rcar") && !url.contains("http://arauvoip.dnsalias.net/rcar");
-            newView.postDelayed(new Runnable() {
-                public void run() {
-                    if (newView.getProgress() == 100) {
-                        newView.postDelayed(new Runnable() {
-                            public void run() {
-                                newView.scrollTo(0, 0);
-                                //pageloaded = true;
-                            }
-                        }, 10);
-                    } else {
-                        newView.post(this);
-                    }
-                }
-            }, 100);
-
+            fastReload = !url.contains("transfer")
+                    && !url.contains("McobrarMercadoPago")
+                    && !url.contains("Mviajeshoyver")
+                    && !url.contains("MTarifador")
+                    && !url.contains("buscar")
+                    && !url.contains("McobroTDF")
+                    && !url.contains("McobrarTDF")
+                    && !url.contains("ppago.php")
+                    && !url.contains("ppago")
+                    && !url.contains("rcar")
+                    && !url.contains("http://arauvoip.dnsalias.net/rcar/plink/ppago");
 
         }
 
@@ -809,7 +798,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             logToSdcard("Remiscar - ", "Login Response " + data.toString());
             // check for success tag
 
-            int success = data.get(TAG_SUCCESS).getAsInt();
+            int success = 1;//data.get(TAG_SUCCESS).getAsInt();
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
                     movil = data.get("movil").getAsString();
