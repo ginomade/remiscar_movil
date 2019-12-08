@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     TextView textNroMovil;
 
-    private boolean firstDataLoad = true;
+    private int firstLocationLoad = 0;
     File outfile = null;
 
     LollipopFixedWebView mWebView;
@@ -342,6 +342,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         pollingManager.startRepeatingTask();
         getSingleLocation();
         loadWebViewDdata();
+        firstLocationLoad = 0;
     }
 
     private void initializeUI() {
@@ -614,8 +615,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onLocationChanged(Location location) {
 
         saveLocationData(location);
-        loadWebViewDdata();
-
+        if(firstLocationLoad < 2){
+            loadWebViewDdata();
+            firstLocationLoad ++;
+        }
     }
 
     public void getMyLocationAddress() {
