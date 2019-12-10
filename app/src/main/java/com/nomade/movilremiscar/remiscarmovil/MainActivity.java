@@ -271,7 +271,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }else{
                 mWebView.loadUrl(url);
             }
-            return true;
+            Log.d("Remiscar ", "webview override - " + url);
+
+            return false;
         }
 
         @Override
