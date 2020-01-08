@@ -13,14 +13,30 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true">
 
-        <TextView
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="10dp"
-            android:text="Remiscar Movil"
-            android:textColor="#ffffff"
-            android:background="#01579B"
-            android:textSize="16dp" />
+            android:layout_height="40dp"
+            android:background="#01579B">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:text="Remiscar Movil"
+                android:textColor="#ffffff"
+                android:textSize="16dp" />
+
+            <ImageButton
+                android:id="@+id/menu_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="5dp"
+                android:src="@drawable/baseline_menu_white_18dp" />
+
+        </RelativeLayout>
+
+
 
         <LinearLayout
             android:orientation="horizontal"

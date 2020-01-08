@@ -35,6 +35,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -78,13 +79,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class MainActivity extends AppCompatActivity implements LocationListener {
+public class MainActivity extends AppCompatActivity implements LocationListener,
+        PopupMenu.OnMenuItemClickListener{
 
     private boolean fastReload = true;
     String t = "0"; //mensajes test
     private String imei, Direccion;
     String TAG_SUCCESS = "result";
-    int st_flag = 0; // status general - 0=libre - 1=ocupado
 
     int flg_origen = 0; // flag repeating task running
     public int pa = 0;// flag para boton de panico
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     Button buttonMap, Crono, buttonNov, buttonPanico;
     ImageButton reloadButton;
+    ImageButton vMenuButton;
 
     String carlitos, carlibres, bahia, bahialibres, status, movil, geopos;
     String Origen, ZonaDestino, ObtCoordenadas;
@@ -356,6 +358,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
+        vMenuButton = (ImageButton) findViewById(R.id.menu_icon);
+        vMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showMenuDialog(view);
+            }
+        });
+
         buttonMap = (Button) findViewById(R.id.buttonMapa);
         buttonMap.setOnClickListener(new View.OnClickListener() {
 
@@ -425,6 +435,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
 
         });
+    }
+
+    private void showMenuDialog(View v){
+        PopupMenu popup = new PopupMenu(MainActivity.this, v);
+        popup.setOnMenuItemClickListener(MainActivity.this);
+        popup.inflate(R.menu.menu_main);
+        popup.show();
     }
 
     private void checkPermissions() {
@@ -1129,6 +1146,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 }
             });
             dialog.show();
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_reclamos:
+                Intent intentReclamos = new
+                        Intent(MainActivity.this, ReclamosActivity.class);
+                startActivity(intentReclamos);
+                return true;
+            case R.id.action_privacidad:
+                Intent intent = new
+                        Intent(MainActivity.this, PrivacyActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                return false;
         }
     }
 }
