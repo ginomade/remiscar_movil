@@ -16,6 +16,7 @@ import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.ReclamosEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ValidacionEvent;
 
@@ -30,7 +31,7 @@ import java.net.URLEncoder;
 
 public class ServiceUtils {
 
-    public static String base_url = "http://carlitosbahia.dynns.com/legajos/viajes/2018/";
+    public static String base_url = "http://www.carlitosbahia.com.ar/legajos/viajes/2020/";
     private static String url_validacion = base_url + "Mvalidacion.php";
     private static String url_iniciofin = base_url + "Miniciofin.php";
     private static String url_alerta = base_url + "Mpanicoalerta.php";
@@ -40,6 +41,8 @@ public class ServiceUtils {
     private static String url_panico = base_url + "Mpanico.php";
     public static String url_main = base_url + "Mviajeshoy.php";
     private static String url_ubicacionViaje = base_url + "Mcoordenadas.php";
+    public static String url_privacy = base_url + "MPprivacidad.php";
+    private static String url_reclamosMovil = base_url + "Mreclamos.php";
 
     public static void asMensaje(Context context) {
 
@@ -304,6 +307,36 @@ public class ServiceUtils {
                             EventBus.getDefault().post(event);
                         } else {
                             Log.d("Remiscar* ", "error en asLocation.");
+                        }
+
+                    }
+                });
+    }
+
+    public static void getReclamos(Context context, String imei, String celu, String mensaje, String nombreUsuario) {
+        String finalUrl = url_reclamosMovil + "?IMEI=" + imei + "&Celular=" + celu
+                + "&Descripcion=" + mensaje + "&Pasajero=" + nombreUsuario;
+        Log.d("remiscar", "getReclamos - " + finalUrl);
+        Ion.with(context)
+                .load(url_reclamosMovil)
+                .setBodyParameter("IMEI", imei)
+                .setBodyParameter("Celular", celu)
+                .setBodyParameter("Descripcion", mensaje)
+                .setBodyParameter("Pasajero", nombreUsuario)
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    @Override
+                    public void onCompleted(Exception e, String result) {
+                        Log.d("Remiscar:", "Reclamos  - " + result);
+                        try {
+
+                            ReclamosEvent event = new ReclamosEvent();
+                            event.setDataString(result);
+                            EventBus.getDefault().post(event);
+
+
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
                         }
 
                     }

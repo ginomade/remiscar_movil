@@ -18,6 +18,7 @@
         <item name="android:shadowRadius">5</item>
         <item name="android:background">#01579B</item>
     </style>
+
     <string name="title_activity_map">MapActivity</string>
     <string name="title_activity_novedades">NovedadesActivity</string>
     <string name="title_activity_camusu">CamUsuActivity</string>
