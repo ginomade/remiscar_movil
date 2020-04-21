@@ -12,9 +12,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -266,8 +268,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.setScrollY(0);
 
-            mWebView.loadUrl(url);
-            return true;
+            if(url.contains("arauvoip")){
+                openUrlInBrowser(url);
+            }else{
+                mWebView.loadUrl(url);
+            }
+            Log.d("Remiscar ", "webview override - " + url);
+
+            return false;
+        }
+
+        @Override
+        public void onFormResubmission(WebView view, Message dontResend, Message resend) {
+            super.onFormResubmission(view, dontResend, resend);
         }
 
         @Override
@@ -309,6 +322,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             super.onReceivedError(view, request, error);
         }
     };
+
+    private void openUrlInBrowser(String url){
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        startActivity(i);
+    }
 
     @Override
     protected void onStart() {
