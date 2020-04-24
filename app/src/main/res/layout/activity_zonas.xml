@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:background="#01579B">
+            android:background="#4863a0">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -25,7 +25,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Viajes pendientes por zonas"
                 android:id="@+id/textView"
-                android:textColor="#ffffff"
+                android:textColor="#d5d9ea"
                 android:layout_marginLeft="20dp"
                 android:textSize="20dp" />
         </FrameLayout>
@@ -44,7 +44,7 @@
             style="@style/ButtonText"
             android:id="@+id/buttonInicio"
             android:layout_alignParentBottom="true"
-            android:background="#01579B" />
+            android:background="#4863a0" />
 
     </LinearLayout>
 </RelativeLayout>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ErrorMessageActivityActivity">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="123dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="30dp"
+        android:tint="#F44336"
+        app:layout_constraintBottom_toTopOf="@+id/editText4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="?android:attr/alertDialogIcon" />
+
+    <TextView
+        android:id="@+id/editText4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:gravity="center"
+        android:text="ATENCIÓN"
+        android:textAlignment="gravity"
+        android:textSize="26sp"
+        app:layout_constraintBottom_toTopOf="@+id/editText5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <Button
+        android:id="@+id/ok_btn"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        style="@style/ButtonText"
+        android:background="#01579B"
+        android:layout_marginBottom="17dp"
+        android:text="Aceptar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText5" />
+
+    <TextView
+        android:id="@+id/editText5"
+        android:layout_width="215dp"
+        android:layout_height="200dp"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        android:text="El dispositivo esta utilizando una localizacion simulada y no va a continuar, dado que esto implica un riesgo de seguridad. Consulte con el administrador."
+        app:layout_constraintBottom_toTopOf="@+id/ok_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText4" />
+</androidx.constraintlayout.widget.ConstraintLayout>

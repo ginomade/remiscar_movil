@@ -17,7 +17,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="#01579B">
+            android:background="#4863a0">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
                 android:text="Datos del Usuario"
                 android:id="@+id/textView2"
                 android:layout_gravity="left|center_vertical"
-                android:textColor="#ffffff" />
+                android:textColor="#d5d9ea" />
         </FrameLayout>
 
         <LinearLayout
@@ -69,7 +69,7 @@
             android:text="Guardar"
             android:id="@+id/button"
             android:layout_gravity="center_horizontal"
-            android:textColor="#ffffff"
-            android:background="#01579B" />
+            android:textColor="#d5d9ea"
+            android:background="#4863a0" />
     </LinearLayout>
 </RelativeLayout>

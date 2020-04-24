@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 
+
 //pantalla de envio de mensaje de alerta
 public class PanicActivity extends Activity implements LocationListener {
 
@@ -76,7 +77,6 @@ public class PanicActivity extends Activity implements LocationListener {
                 if ("".equals(geopos)) {
                     Toast.makeText(PanicActivity.this, "Localizacion no detectada. Vuelva a intentar.", Toast.LENGTH_LONG).show();
                 } else {
-
                     Toast.makeText(PanicActivity.this, "PRUEBA de alerta enviada.", Toast.LENGTH_LONG).show();
                     prueba.setBackgroundColor(Color.parseColor("#326166"));
                     processAlert("PRUEBA");
@@ -146,7 +146,7 @@ public class PanicActivity extends Activity implements LocationListener {
             if (type.equals("PRUEBA")) {
                 asPanic(type, url_panico);
 
-            } else {
+            }else{
                 String url_location = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latmovil + "," + lonmovil
                         + "&key=AIzaSyCKBR3GAk_m3_Ub3VCDx8MTVucs2acq0-4";
                 asUbicacion(url_location, type);
@@ -240,7 +240,7 @@ public class PanicActivity extends Activity implements LocationListener {
                 Log.d("Remiscar* panic -", "PRUEBA");
                 edit.setText("PRUEBA EXITOSA. IMEI:" + imei + " - Ubicacion:" + Direccion + " - Movil:" + movil + " - " + geopos);
 
-            } else {
+            }else{
                 Log.d("Remiscar* panic -", "ALERTA");
 
                 finish();

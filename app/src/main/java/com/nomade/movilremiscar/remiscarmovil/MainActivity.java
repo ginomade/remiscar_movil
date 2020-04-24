@@ -12,11 +12,9 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -49,6 +47,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.JsonObject;
 import com.nomade.movilremiscar.remiscarmovil.Util.GooglePlayServicesHelper;
+import com.nomade.movilremiscar.remiscarmovil.Util.LocationServiceHelper;
 import com.nomade.movilremiscar.remiscarmovil.Util.LollipopFixedWebView;
 import com.nomade.movilremiscar.remiscarmovil.Util.MinutePollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.Util.PollingManager;
@@ -63,6 +62,8 @@ import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PunteroAlternativaEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PunteroLibreEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ValidacionEvent;
 
@@ -82,7 +83,8 @@ import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity implements LocationListener,
-        PopupMenu.OnMenuItemClickListener{
+        PopupMenu.OnMenuItemClickListener {
+
 
     private boolean fastReload = true;
     String t = "0"; //mensajes test
@@ -94,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     int flg_mens = 0; // flag para mensajes
     int flg_mens_auto = 0;
     int flg_puntero = 0;
+    int flg_puntero_alternativa = 0;
+    int flg_puntero_libre = 0;
     Double lat = 0.0;
     Double lon = 0.0;
 
@@ -155,6 +159,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         locationHelper = new GooglePlayServicesHelper(this, true);
 
+        // validar que el dispositivo no utilice localizacion simulada
+        if (LocationServiceHelper.isMockedLocation(mContext)) {
+            showFakeLocationMessage();
+        }
 
         ////////////TEST////////////////////////////
         ////log en sdcard
@@ -217,6 +225,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    private void showFakeLocationMessage() {
+        Intent intent = new Intent(MainActivity.this, ErrorMessageActivityActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
@@ -259,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         String finalUrl = ServiceUtils.url_main + "?imei=" + imei
                 + "&Movil=" + movil
                 + "&geopos=" + geoposLocal;
-        Log.d("Remiscar ", "webview - " + finalUrl);
+        Log.d("Remiscar: ", "webview - " + finalUrl);
         mWebView.loadUrl(finalUrl);
     }
 
@@ -267,29 +281,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.setScrollY(0);
-
-            if(url.contains("arauvoip")){
-                openUrlInBrowser(url);
-            }else{
-                mWebView.loadUrl(url);
-            }
-            Log.d("Remiscar ", "webview override - " + url);
-
-            return false;
-        }
-
-        @Override
-        public void onFormResubmission(WebView view, Message dontResend, Message resend) {
-            super.onFormResubmission(view, dontResend, resend);
+            mWebView.loadUrl(url);
+            return true;
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
+            final WebView newView = view;
             //bloqueo del click en el webview
-            mWebView.setClickable(true);
-            fastReload = !url.contains("transfer")
+            //mWebView.setClickable(true);
+            fastReload = !url.contains("Mviajeshoyver")
                     && !url.contains("McobrarMercadoPago")
-                    && !url.contains("Mviajeshoyver")
+                    && !url.contains("transfer")
                     && !url.contains("MTarifador")
                     && !url.contains("buscar")
                     && !url.contains("McobroTDF")
@@ -299,6 +302,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                     && !url.contains("rcar")
                     && !url.contains("http://arauvoip.dnsalias.net/rcar/plink/ppago");
 
+            newView.postDelayed(new Runnable() {
+                public void run() {
+                    if (newView.getProgress() == 100) {
+                        newView.postDelayed(new Runnable() {
+                            public void run() {
+                                newView.scrollTo(0, 0);
+                                //pageloaded = true;
+                            }
+                        }, 10);
+                    } else {
+                        newView.post(this);
+                    }
+                }
+            }, 100);
         }
 
         @Override
@@ -323,12 +340,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
     };
 
-    private void openUrlInBrowser(String url){
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(url));
-        startActivity(i);
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -352,6 +363,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         super.onPause();
         pollingManager.stopRepeatingTask();
         locationHelper.onPause();
+        mWebView.onPause();
+        mWebView.loadData("", "text/html; charset=UTF-8", null);
+        mWebView.setWebViewClient(new WebViewClient());
         EventBus.getDefault().unregister(this);
     }
 
@@ -362,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         locationHelper.onResume(MainActivity.this);
         pollingManager.startRepeatingTask();
         getSingleLocation();
-        loadWebViewDdata();
+        setMainView();
         firstLocationLoad = 0;
     }
 
@@ -653,8 +667,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         saveLocationData(location);
         if(firstLocationLoad < 2){
             loadWebViewDdata();
-            firstLocationLoad ++;
+            firstLocationLoad++;
         }
+
     }
 
     public void getMyLocationAddress() {
@@ -1024,7 +1039,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 logToSdcard("Remiscar -", "AUTODESPACHO.");
                 if (flg_mens_auto == 0) {
                     Toast.makeText(mContext, "AUTODESPACHO.", Toast.LENGTH_SHORT).show();
-                    final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
+                    final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answerv);
                     mp.start();
                     flg_mens_auto = 1;
                 } else {
@@ -1064,9 +1079,88 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 logToSdcard("Remiscar -", "PunteroEvent.");
                 if (flg_puntero == 0) {
                     Toast.makeText(mContext, "PunteroEvent.", Toast.LENGTH_SHORT).show();
-                    final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answer);
+                    final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answerv);
                     mp.start();
                     flg_puntero = 1;
+                } else {
+
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Subscribe()
+    public void processPunteroAlternativa(PunteroAlternativaEvent data) {
+        int success;
+        JsonObject result = new JsonObject();
+        result = data.getObject();
+        Log.d("Remiscar", "PunteroAlternativaEvent:" + imei + "-" + movil);
+        logToSdcard("Remiscar", "PunteroAlternativaEvent:" + imei + "-" + movil);
+
+        // check for success tag
+        try {
+            Log.d("Remiscar - Puntero r-", result.toString());
+            logToSdcard("Remiscar - PunteroAlternativaEvent r-", result.toString());
+            success = result.get(TAG_SUCCESS).getAsInt();
+
+            Log.d("Remiscar -", "s- " + success);
+            logToSdcard("Remiscar -", "s- " + success);
+
+            if (success == 0) {
+                Log.d("Remiscar -", "sin mensajes.");
+                logToSdcard("Remiscar -", "sin mensajes.");
+                flg_puntero_alternativa = 0;
+            } else if (success == 1) {
+                Log.d("Remiscar -", "PunteroAlternativaEvent.");
+                logToSdcard("Remiscar -", "PunteroAlternativaEvent.");
+                if (flg_puntero_alternativa == 0) {
+                    Toast.makeText(mContext, "PunteroAlternativaEvent.", Toast.LENGTH_SHORT).show();
+                    final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answerv);
+                    mp.start();
+                    flg_puntero_alternativa = 1;
+                } else {
+
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    @Subscribe()
+    public void processPunteroLibre(PunteroLibreEvent data) {
+        int success;
+        JsonObject result = new JsonObject();
+        result = data.getObject();
+        Log.d("Remiscar", "PunteroLibreEvent:" + imei + "-" + movil);
+        logToSdcard("Remiscar", "PunteroLibreEvent:" + imei + "-" + movil);
+
+        // check for success tag
+        try {
+            Log.d("Remiscar - Puntero r-", result.toString());
+            logToSdcard("Remiscar - PunteroLibreEvent r-", result.toString());
+            success = result.get(TAG_SUCCESS).getAsInt();
+
+            Log.d("Remiscar -", "s- " + success);
+            logToSdcard("Remiscar -", "s- " + success);
+
+            if (success == 0) {
+                Log.d("Remiscar -", "sin mensajes.");
+                logToSdcard("Remiscar -", "sin mensajes.");
+                flg_puntero_libre = 0;
+            } else if (success == 1) {
+                Log.d("Remiscar -", "PunteroLibreEvent.");
+                logToSdcard("Remiscar -", "PunteroLibreEvent.");
+                if (flg_puntero_libre == 0) {
+                    Toast.makeText(mContext, "PunteroLibreEvent.", Toast.LENGTH_SHORT).show();
+                    final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.c2answerv);
+                    mp.start();
+                    flg_puntero_libre = 1;
                 } else {
 
                 }

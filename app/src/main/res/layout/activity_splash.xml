@@ -71,7 +71,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="20dp"
-        android:text="VERSION 2.8"
+        android:text="VERSION 3.6"
         android:id="@+id/textView17"
         android:textColor="#ffffff"
         android:background="#F80820FA"

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
+
 // pantalla de datos de viajes para el movil
 public class CobrarActivity extends AppCompatActivity {
 

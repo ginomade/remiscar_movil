@@ -8,6 +8,7 @@ import android.webkit.WebViewClient;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
+
 //pantalla de carga de datos para propietarios
 public class PropActivity extends Activity {
 

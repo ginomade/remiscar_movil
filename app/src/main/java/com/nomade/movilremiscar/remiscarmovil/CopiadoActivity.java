@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.nomade.movilremiscar.remiscarmovil.Util.ServiceUtils;
 import com.nomade.movilremiscar.remiscarmovil.Util.SharedPrefsUtil;
 
+
 //pantalla de datos de viajes
 public class CopiadoActivity extends AppCompatActivity {
 
