@@ -16,7 +16,10 @@ import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PunteroAlternativaEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PunteroLibreEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ReclamosEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.SimulacionEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ValidacionEvent;
 
@@ -31,21 +34,25 @@ import java.net.URLEncoder;
 
 public class ServiceUtils {
 
-    public static String base_url = "http://www.carlitosbahia.com.ar/legajos/viajes/2020/";
+    public static String base_url = "https://carlitosbahia.com.ar/legajos/viajes/2020/";
     private static String url_validacion = base_url + "Mvalidacion.php";
     private static String url_iniciofin = base_url + "Miniciofin.php";
     private static String url_alerta = base_url + "Mpanicoalerta.php";
     private static String url_mensaje = base_url + "Mmensajes.php";
     private static String url_auto = base_url + "Mauto.php";
     private static String url_puntero = base_url + "Mmovilpuntero.php";
+    private static String url_puntero_alternativa = base_url + "Mmovilpunteroalternativa.php";
+    private static String url_puntero_libre = base_url + "Mmovilpunterolibre.php";
+    private static String url_puntero_viaje = base_url + "Mmovilpunteroviaje.php";
     private static String url_panico = base_url + "Mpanico.php";
     public static String url_main = base_url + "Mviajeshoy.php";
     private static String url_ubicacionViaje = base_url + "Mcoordenadas.php";
     public static String url_privacy = base_url + "MPprivacidad.php";
     private static String url_reclamosMovil = base_url + "Mreclamos.php";
+    private static String url_simulacion_posicion = base_url + "simulacion.php";
 
     public static void asMensaje(Context context) {
-
+        Log.d("remiscar: ", "asMensaje - " + url_mensaje);
         Ion.with(context)
                 .load(url_mensaje)
                 .setBodyParameter("Movil", SharedPrefsUtil.getInstance(context).getString("movil", ""))
@@ -59,7 +66,7 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en respuesta de mensajes.");
+                            Log.d("Remiscar: ", "error en respuesta de mensajes.");
                         }
                     }
                 });
@@ -69,6 +76,7 @@ public class ServiceUtils {
         String finalUrl = url_ubicacionViaje
                 + "?Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
                 + "&IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "");
+        Log.d("remiscar: ", "asCoordenadas - " + url_mensaje);
         Ion.with(context)
                 .load(finalUrl)
                 .asJsonObject()
@@ -80,7 +88,7 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en respuesta de Mcoordenadas.");
+                            Log.d("Remiscar: ", "error en respuesta de Mcoordenadas.");
                         }
                     }
                 });
@@ -101,14 +109,14 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en asAuto.");
+                            Log.d("Remiscar: ", "error en asAuto.");
                         }
                     }
                 });
     }
 
     public static void checkPuntero(Context context) {
-
+        Log.d("remiscar: ", "checkPuntero - " + url_puntero);
         Ion.with(context)
                 .load(url_puntero)
                 .setBodyParameter("Movil", SharedPrefsUtil.getInstance(context).getString("movil", ""))
@@ -122,12 +130,74 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en checkPuntero.");
+                            Log.d("Remiscar: ", "error en checkPuntero.");
                         }
                     }
                 });
     }
 
+    public static void checkPunteroAlternativa(Context context) {
+
+        Ion.with(context)
+                .load(url_puntero_alternativa)
+                .setBodyParameter("Movil", SharedPrefsUtil.getInstance(context).getString("movil", ""))
+                .setBodyParameter("IMEI", SharedPrefsUtil.getInstance(context).getString("imei", ""))
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (result != null) {
+                            PunteroAlternativaEvent event = new PunteroAlternativaEvent();
+                            event.setObject(result);
+                            EventBus.getDefault().post(event);
+                        } else {
+                            Log.d("Remiscar: ", "error en checkPuntero.");
+                        }
+                    }
+                });
+    }
+
+    public static void checkPunteroLibre(Context context) {
+
+        Ion.with(context)
+                .load(url_puntero_libre)
+                .setBodyParameter("Movil", SharedPrefsUtil.getInstance(context).getString("movil", ""))
+                .setBodyParameter("IMEI", SharedPrefsUtil.getInstance(context).getString("imei", ""))
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (result != null) {
+                            PunteroLibreEvent event = new PunteroLibreEvent();
+                            event.setObject(result);
+                            EventBus.getDefault().post(event);
+                        } else {
+                            Log.d("Remiscar: ", "error en checkPuntero.");
+                        }
+                    }
+                });
+    }
+
+    public static void checkPunteroViaje(Context context) {
+
+        Ion.with(context)
+                .load(url_puntero_viaje)
+                .setBodyParameter("Movil", SharedPrefsUtil.getInstance(context).getString("movil", ""))
+                .setBodyParameter("IMEI", SharedPrefsUtil.getInstance(context).getString("imei", ""))
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (result != null) {
+                            PunteroEvent event = new PunteroEvent();
+                            event.setObject(result);
+                            EventBus.getDefault().post(event);
+                        } else {
+                            Log.d("Remiscar: ", "error en checkPuntero.");
+                        }
+                    }
+                });
+    }
     /**
      * Background Async Task mensaje de Panico
      * envia actualizacion de ubicacion de alerta si el movil envio la alerta
@@ -142,6 +212,7 @@ public class ServiceUtils {
                 "&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") +
                 "&IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
                 "&Ubicacion=" + direccion + "&geopos=" + geopos;
+        Log.d("remiscar: ", "asPanic - " + url_params);
         Ion.with(context)
                 .load(url_params)
                 .asJsonObject()
@@ -153,7 +224,7 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en asPanic.");
+                            Log.d("Remiscar: ", "error en asPanic.");
                         }
                     }
                 });
@@ -195,7 +266,7 @@ public class ServiceUtils {
                                 event.setObject(result);
                                 EventBus.getDefault().post(event);
                             } else {
-                                Log.d("Remiscar* ", "error en asInicioFin.");
+                                Log.d("Remiscar: ", "error en asInicioFin.");
                             }
                         }
                     });
@@ -216,7 +287,8 @@ public class ServiceUtils {
                 + "&Ubicacion=" + direccion
                 + "&movil_al="
                 + "&GeoPos=" + geoposLocal;
-        Log.d("Remiscar* ", "asAlert. LOC - " + url_params);
+
+                Log.d("Remiscar: ", "asAlert. LOC - " + url_params);
         Ion.with(context)
                 .load(url_params)
                 .asJsonObject()
@@ -228,27 +300,27 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en asAlert.");
+                            Log.d("Remiscar: ", "error en asAlert.");
                         }
                     }
                 });
     }
 
-    public static String getVersionName(Context context){
+    public static String getVersionName(Context context) {
         String version = "";
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             version = pInfo.versionName;
             int versionCode = pInfo.versionCode;
-            Log.d("Remiscar", "Version Name : "+version + "\n Version Code : "+versionCode);
-        } catch(PackageManager.NameNotFoundException e) {
+            Log.d("Remiscar: ", "Version Name : " + version + "\n Version Code : " + versionCode);
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
-            Log.d("Remiscar", "PackageManager Catch : "+e.toString());
+            Log.d("Remiscar: ", "PackageManager Catch : "+e.toString());
         }
         return version;
     }
-
     public static void asValidarUsuario(Context context) {
+        Log.d("Remiscar: ", "asValidarUsuario - " + url_validacion);
         Ion.with(context)
                 .load(url_validacion)
                 .setBodyParameter("IMEI", SharedPrefsUtil.getInstance(context).getString("imei", ""))
@@ -258,16 +330,47 @@ public class ServiceUtils {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
                         try {
-                            Log.d("Remiscar* ", "error en asValidarUsuario." + result.toString());
+                            Log.d("Remiscar: ", "error en asValidarUsuario." + result.toString());
                             if (result != null) {
                                 ValidacionEvent event = new ValidacionEvent();
                                 event.setObject(result);
                                 EventBus.getDefault().post(event);
                             } else {
-                                Log.d("Remiscar* ", "error en asValidarUsuario.");
+                                Log.d("Remiscar: ", "error en asValidarUsuario.");
                             }
                         } catch (Exception ee) {
-                            Log.d("Remiscar* ", " asValidarUsuario - error" + ee);
+                            Log.d("Remiscar: ", " asValidarUsuario - error" + ee);
+                        }
+
+                    }
+                });
+
+    }
+
+    public static void getReclamos(Context context, String imei, String celu, String mensaje, String nombreUsuario) {
+        String finalUrl = url_reclamosMovil + "?IMEI=" + imei + "&Celular=" + celu
+                + "&Descripcion=" + mensaje + "&Pasajero=" + nombreUsuario;
+        Log.d("remiscar: ", "getReclamos - " + finalUrl);
+        Ion.with(context)
+                .load(url_reclamosMovil)
+                .setBodyParameter("IMEI", imei)
+                .setBodyParameter("Celular", celu)
+                .setBodyParameter("Descripcion", mensaje)
+                .setBodyParameter("Pasajero", nombreUsuario)
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    @Override
+                    public void onCompleted(Exception e, String result) {
+                        Log.d("Remiscar: ", "Reclamos  - " + result);
+                        try {
+
+                            ReclamosEvent event = new ReclamosEvent();
+                            event.setDataString(result);
+                            EventBus.getDefault().post(event);
+
+
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
                         }
 
                     }
@@ -275,6 +378,7 @@ public class ServiceUtils {
     }
 
     public static void asLocation(Context context, String url_location) {
+        Log.d("Remiscar: ", "asLocation - " + url_location);
         Ion.with(context)
                 .load(url_location)
                 .setBodyParameter("key", "AIzaSyCKBR3GAk_m3_Ub3VCDx8MTVucs2acq0-4")//AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw
@@ -287,7 +391,7 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en asLocation.");
+                            Log.d("Remiscar: ", "error en asLocation.");
                         }
 
                     }
@@ -295,6 +399,7 @@ public class ServiceUtils {
     }
 
     public static void asUbicacion(Context context, String url_ubicacion) {
+        Log.d("Remiscar: ", "asUbicacion - " + url_ubicacion);
         Ion.with(context)
                 .load(url_ubicacion)
                 .asJsonObject()
@@ -306,39 +411,31 @@ public class ServiceUtils {
                             event.setObject(result);
                             EventBus.getDefault().post(event);
                         } else {
-                            Log.d("Remiscar* ", "error en asLocation.");
+                            Log.d("Remiscar: ", "error en asLocation.");
                         }
 
                     }
                 });
     }
 
-    public static void getReclamos(Context context, String imei, String celu, String mensaje, String nombreUsuario) {
-        String finalUrl = url_reclamosMovil + "?IMEI=" + imei + "&Celular=" + celu
-                + "&Descripcion=" + mensaje + "&Pasajero=" + nombreUsuario;
-        Log.d("remiscar", "getReclamos - " + finalUrl);
+    public static void sendFakeLocationMessageService(Context context) {
+        String url_params = url_simulacion_posicion +
+                "?Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") +
+                "&IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
+                "&Programa=" + SharedPrefsUtil.getInstance(context).getString("app_simulacion", "");
+        Log.d("remiscar: ", "posicion simulada - " + url_params);
         Ion.with(context)
-                .load(url_reclamosMovil)
-                .setBodyParameter("IMEI", imei)
-                .setBodyParameter("Celular", celu)
-                .setBodyParameter("Descripcion", mensaje)
-                .setBodyParameter("Pasajero", nombreUsuario)
-                .asString()
-                .setCallback(new FutureCallback<String>() {
+                .load(url_params)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
                     @Override
-                    public void onCompleted(Exception e, String result) {
-                        Log.d("Remiscar:", "Reclamos  - " + result);
+                    public void onCompleted(Exception e, JsonObject result) {
                         try {
-
-                            ReclamosEvent event = new ReclamosEvent();
-                            event.setDataString(result);
+                            SimulacionEvent event = new SimulacionEvent();
                             EventBus.getDefault().post(event);
-
-
-                        } catch (Exception e1) {
-                            e1.printStackTrace();
+                        } catch (Exception ex) {
+                            Log.d("Remiscar: ", "error en sendFakeLocationMessageService.");
                         }
-
                     }
                 });
     }

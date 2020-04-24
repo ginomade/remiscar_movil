@@ -34,6 +34,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 
 
+
 public class MapActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback {
 
     Double latmovil, lonmovil, latOrigen, lonOrigen;
