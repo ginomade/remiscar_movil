@@ -363,7 +363,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         super.onPause();
         pollingManager.stopRepeatingTask();
         locationHelper.onPause();
-        mWebView.onPause();
         mWebView.loadData("", "text/html; charset=UTF-8", null);
         mWebView.setWebViewClient(new WebViewClient());
         EventBus.getDefault().unregister(this);
@@ -376,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         locationHelper.onResume(MainActivity.this);
         pollingManager.startRepeatingTask();
         getSingleLocation();
-        setMainView();
+        iniciarServicios();
         firstLocationLoad = 0;
     }
 
@@ -853,6 +852,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             // check for success tag
 
             int success = data.get(TAG_SUCCESS).getAsInt();
+
             if (success == 1 || success == 2) {
                 if (data.has("movil") && !data.get("movil").isJsonNull())
                     movil = data.get("movil").getAsString();
