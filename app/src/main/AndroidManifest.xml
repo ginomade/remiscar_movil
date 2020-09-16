@@ -47,7 +47,7 @@
             android:label="@string/title_activity_map" /> <!-- Google MAP API key -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyCKBR3GAk_m3_Ub3VCDx8MTVucs2acq0-4" />
+            android:value="" />
 
         <activity
             android:name=".NovedadesActivity"

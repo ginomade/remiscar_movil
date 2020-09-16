@@ -148,7 +148,7 @@ public class PanicActivity extends Activity implements LocationListener {
 
             }else{
                 String url_location = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latmovil + "," + lonmovil
-                        + "&key=AIzaSyCKBR3GAk_m3_Ub3VCDx8MTVucs2acq0-4";
+                        + "&key=";
                 asUbicacion(url_location, type);
             }
 
