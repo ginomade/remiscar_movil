@@ -392,7 +392,7 @@ public class ServiceUtils {
         Log.d("Remiscar: ", "asLocation - " + url_location);
         Ion.with(context)
                 .load(url_location)
-                .setBodyParameter("key", "")//AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw
+                .setBodyParameter("key", "")
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
