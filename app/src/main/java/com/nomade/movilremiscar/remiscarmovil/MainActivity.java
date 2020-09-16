@@ -61,8 +61,8 @@ import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PollingEvent;
-import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PunteroAlternativaEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PunteroLibreEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.UbicacionEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ValidacionEvent;
@@ -469,7 +469,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         });
     }
 
-    private void showMenuDialog(View v){
+    private void showMenuDialog(View v) {
         PopupMenu popup = new PopupMenu(MainActivity.this, v);
         popup.setOnMenuItemClickListener(MainActivity.this);
         popup.inflate(R.menu.menu_main);
@@ -630,6 +630,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     private void saveLocationData(Location singleLocation) {
 
+        lat = singleLocation.getLatitude();
+        lon = singleLocation.getLongitude();
         sharedPrefs.saveFloat("latmovil", ((float) singleLocation.getLatitude()));
         sharedPrefs.saveFloat("lonmovil", ((float) singleLocation.getLongitude()));
         String str = singleLocation.getLatitude() + "," + singleLocation.getLongitude();
@@ -664,7 +666,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void onLocationChanged(Location location) {
 
         saveLocationData(location);
-        if(firstLocationLoad < 2){
+        if (firstLocationLoad < 2) {
             loadWebViewDdata();
             firstLocationLoad++;
         }
@@ -674,8 +676,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void getMyLocationAddress() {
 
         try {
-            String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon;
-            //+"&sensor=false&location_type=RANGE_INTERPOLATED&key=AIzaSyBZsub9dRqt2nJXZrSBzLRpFh4e0iK7XAE";
+            String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon
+                    + "&key=";
+
             ServiceUtils.asUbicacion(mContext, url);
         } catch (Exception e) {
 
@@ -692,13 +695,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         try {
             JsonObject result = data.getObject();
-            Log.d("Remiscar ", "LOC --" + result.getAsString());
-            logToSdcard("Remiscar ", "LOC --" + result.getAsString());
 
             JsonObject location = result.getAsJsonArray("results").get(0).getAsJsonObject();
             String location_string = location.get("formatted_address").getAsString();
             Direccion = location_string;
             sharedPrefs.saveString("Direccion", Direccion);
+            Log.d("Remiscar ", "LOC --" + Direccion);
 
             frmStatusLoc.setBackgroundColor(Color.parseColor("#00FF00"));
 
@@ -719,9 +721,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             String lOrigen = Calles(Origen);
 
             String formatedUrl = URLEncoder.encode(lOrigen + ",Ushuaia,Tierra del Fuego,Argentina", "utf-8");
-            String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + formatedUrl;//&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw";
+            String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + formatedUrl;
             /////TEST//////////////////
-            //String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+ Origen +",La Plata,La Plata,Argentina&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw";
+            //String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+ Origen +",La Plata,La Plata,Argentina&key=";
             /////TEST//////////////////
             ServiceUtils.asLocation(mContext, url);
             Log.d("REMISCAR - ", "Buscando Direccion ****** " + lOrigen);
@@ -745,7 +747,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         //    locOrigen = Origen.toLowerCase().replaceFirst("calle xx", "calle correcta");}
         //
         // para verificar la calle:
-        // https://maps.googleapis.com/maps/api/geocode/json?address=calle,Ushuaia,Tierra del Fuego,Argentina&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw
+        // https://maps.googleapis.com/maps/api/geocode/json?address=calle,Ushuaia,Tierra del Fuego,Argentina&key=
         // debe aparecer al final de los datos devueltos:
         // "status" : "OK"
 
@@ -939,7 +941,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
                     //obtengo direccion en seguimiento
                     getMyLocationAddress();
-                    ServiceUtils.asPanic(MainActivity.this, "SEGUIMIENTO", Direccion, geopos);
+                    ServiceUtils.asPanic(MainActivity.this, "SEGUIMIENTO");
                 } else {
                     sharedPrefs.saveString("al_status", al_status);
                     sharedPrefs.saveString("al_fecha", al_fecha);
@@ -948,8 +950,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                     sharedPrefs.saveString("al_ubicacion", al_ubicacion);
 
                     frmAlerta.setVisibility(View.VISIBLE);
-                    //AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) frmAlerta.getLayoutParams();
-                    //params.height = 100;
+
                     Log.d("Remiscar -", "alerta recibida");
                     logToSdcard("Remiscar -", "alerta recibida");
                 }
@@ -961,7 +962,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("Remiscar", e.getMessage());
         }
     }
 
@@ -1132,6 +1133,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
 
     }
+
     @Subscribe()
     public void processPunteroLibre(PunteroLibreEvent data) {
         int success;
