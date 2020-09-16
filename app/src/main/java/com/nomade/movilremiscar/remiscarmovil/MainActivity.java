@@ -677,7 +677,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         try {
             String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon
-                    + "&key=AIzaSyCKBR3GAk_m3_Ub3VCDx8MTVucs2acq0-4";
+                    + "&key=";
 
             ServiceUtils.asUbicacion(mContext, url);
         } catch (Exception e) {
@@ -721,9 +721,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             String lOrigen = Calles(Origen);
 
             String formatedUrl = URLEncoder.encode(lOrigen + ",Ushuaia,Tierra del Fuego,Argentina", "utf-8");
-            String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + formatedUrl;//&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw";
+            String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + formatedUrl;
             /////TEST//////////////////
-            //String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+ Origen +",La Plata,La Plata,Argentina&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw";
+            //String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+ Origen +",La Plata,La Plata,Argentina&key=";
             /////TEST//////////////////
             ServiceUtils.asLocation(mContext, url);
             Log.d("REMISCAR - ", "Buscando Direccion ****** " + lOrigen);
@@ -747,7 +747,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         //    locOrigen = Origen.toLowerCase().replaceFirst("calle xx", "calle correcta");}
         //
         // para verificar la calle:
-        // https://maps.googleapis.com/maps/api/geocode/json?address=calle,Ushuaia,Tierra del Fuego,Argentina&key=AIzaSyD4m6agvDZRVJahBFnBe5wWGi3cM7Hlmxw
+        // https://maps.googleapis.com/maps/api/geocode/json?address=calle,Ushuaia,Tierra del Fuego,Argentina&key=
         // debe aparecer al final de los datos devueltos:
         // "status" : "OK"
 
