@@ -15,8 +15,8 @@ import com.nomade.movilremiscar.remiscarmovil.events.InicioFinEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.LocationEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.MensajeEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PanicEvent;
-import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PunteroAlternativaEvent;
+import com.nomade.movilremiscar.remiscarmovil.events.PunteroEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.PunteroLibreEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.ReclamosEvent;
 import com.nomade.movilremiscar.remiscarmovil.events.SimulacionEvent;
@@ -198,36 +198,42 @@ public class ServiceUtils {
                     }
                 });
     }
+
     /**
      * Background Async Task mensaje de Panico
      * envia actualizacion de ubicacion de alerta si el movil envio la alerta
      * new PanicTask().execute("ALERTA", url_panico);
      */
     public static void asPanic(Context context,
-                               String statusIn,
-                               String direccion,
-                               String geopos) {
-        String status = statusIn;
-        String url_params = url_panico + "?status=" + status +
-                "&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") +
-                "&IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
-                "&Ubicacion=" + direccion + "&geopos=" + geopos;
-        Log.d("remiscar: ", "asPanic - " + url_params);
-        Ion.with(context)
-                .load(url_params)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (result != null) {
-                            PanicEvent event = new PanicEvent();
-                            event.setObject(result);
-                            EventBus.getDefault().post(event);
-                        } else {
-                            Log.d("Remiscar: ", "error en asPanic.");
+                               String statusIn) {
+        String direccion = null;
+        try {
+            direccion = URLEncoder.encode(SharedPrefsUtil.getInstance(context).getString("Direccion", ""), "UTF-8");
+            String geopos = SharedPrefsUtil.getInstance(context).getString("geopos", "");
+            String status = statusIn;
+            String url_params = url_panico + "?status=" + status +
+                    "&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "") +
+                    "&IMEI=" + SharedPrefsUtil.getInstance(context).getString("imei", "") +
+                    "&Ubicacion=" + direccion + "&geopos=" + geopos;
+            Log.d("remiscar: ", "asPanic - " + url_params);
+            Ion.with(context)
+                    .load(url_params)
+                    .asJsonObject()
+                    .setCallback(new FutureCallback<JsonObject>() {
+                        @Override
+                        public void onCompleted(Exception e, JsonObject result) {
+                            if (result != null) {
+                                PanicEvent event = new PanicEvent();
+                                event.setObject(result);
+                                EventBus.getDefault().post(event);
+                            } else {
+                                Log.d("Remiscar: ", "error en asPanic.");
+                            }
                         }
-                    }
-                });
+                    });
+        } catch (UnsupportedEncodingException e) {
+            Log.d("Remiscar", e.getMessage());
+        }
     }
 
     /**
@@ -280,30 +286,34 @@ public class ServiceUtils {
      */
     public static void asAlert(Context context,
                                String direccion) {
-        String geoposLocal = SharedPrefsUtil.getInstance(context).getString("geopos", "");
-        String url_params = url_alerta + "?IMEI="
-                + SharedPrefsUtil.getInstance(context).getString("imei", "")
-                + "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
-                + "&Ubicacion=" + direccion
-                + "&movil_al="
-                + "&GeoPos=" + geoposLocal;
+        try {
+            String geoposLocal = SharedPrefsUtil.getInstance(context).getString("geopos", "");
+            String url_params = url_alerta + "?IMEI="
+                    + SharedPrefsUtil.getInstance(context).getString("imei", "")
+                    + "&status=&Movil=" + SharedPrefsUtil.getInstance(context).getString("movil", "")
+                    + "&Ubicacion=" + URLEncoder.encode(direccion, "UTF-8")
+                    + "&movil_al="
+                    + "&GeoPos=" + geoposLocal;
 
-                Log.d("Remiscar: ", "asAlert. LOC - " + url_params);
-        Ion.with(context)
-                .load(url_params)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (result != null) {
-                            AlertEvent event = new AlertEvent();
-                            event.setObject(result);
-                            EventBus.getDefault().post(event);
-                        } else {
-                            Log.d("Remiscar: ", "error en asAlert.");
+            Log.d("Remiscar: ", "asAlert. LOC - " + url_params);
+            Ion.with(context)
+                    .load(url_params)
+                    .asJsonObject()
+                    .setCallback(new FutureCallback<JsonObject>() {
+                        @Override
+                        public void onCompleted(Exception e, JsonObject result) {
+                            if (result != null) {
+                                AlertEvent event = new AlertEvent();
+                                event.setObject(result);
+                                EventBus.getDefault().post(event);
+                            } else {
+                                Log.d("Remiscar: ", "error en asAlert.");
+                            }
                         }
-                    }
-                });
+                    });
+        } catch (UnsupportedEncodingException e) {
+            Log.d("Remiscar", e.getMessage());
+        }
     }
 
     public static String getVersionName(Context context) {
@@ -315,10 +325,11 @@ public class ServiceUtils {
             Log.d("Remiscar: ", "Version Name : " + version + "\n Version Code : " + versionCode);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
-            Log.d("Remiscar: ", "PackageManager Catch : "+e.toString());
+            Log.d("Remiscar: ", "PackageManager Catch : " + e.toString());
         }
         return version;
     }
+
     public static void asValidarUsuario(Context context) {
         Log.d("Remiscar: ", "asValidarUsuario - " + url_validacion);
         Ion.with(context)
